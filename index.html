@@ -14,17 +14,17 @@
 :root{
   --bg:#F7F5F2; --surface:#FFFFFF; --ink:#241C27; --muted:#6F6674; --line:#E6E1E8;
   --good:#1F7A4D; --good-soft:#E3F2EA; --bad:#B3262E; --bad-soft:#FBE7E8;
-  --plum:#2B1A2E; --accent:var(--good); --accent-soft:var(--good-soft);
+  --plum:#2B1A2E; --accent:var(--good); --accent-soft:var(--good-soft); --on:#fff;
   --r:16px;
   font-family:'Figtree',system-ui,sans-serif;
 }
 @media (prefers-color-scheme:dark){
   :root{--bg:#171218; --surface:#241C27; --ink:#F2EDF3; --muted:#A99FB0; --line:#3A2F3E;
-    --good:#4FC58A; --good-soft:#17342A; --bad:#F0777E; --bad-soft:#3E1D21; --plum:#120C14;}
+    --good:#4FC58A; --good-soft:#17342A; --bad:#F0777E; --bad-soft:#3E1D21; --plum:#120C14; --on:#120C14;}
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-size:16px}
-body{padding-top:env(safe-area-inset-top);padding-bottom:calc(96px + env(safe-area-inset-bottom));min-height:100vh}
+body{padding-top:env(safe-area-inset-top);padding-bottom:calc(32px + env(safe-area-inset-bottom));min-height:100vh}
 body.bad{--accent:var(--bad);--accent-soft:var(--bad-soft)}
 h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;margin:0}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
@@ -41,68 +41,81 @@ input,select,textarea{font:inherit;color:inherit}
 .field input,.field select,.field textarea{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface)}
 .field textarea{resize:vertical;min-height:70px}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;font-weight:600;background:var(--plum);color:#fff}
-.btn.accent{background:var(--accent);color:#fff}
+.btn.accent{background:var(--accent);color:var(--on)}
 .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
 .btn.danger{background:transparent;color:var(--bad);border:1.5px solid var(--bad)}
 .btn+.btn{margin-top:10px}
 .link{color:var(--muted);text-decoration:underline;padding:10px;display:block;margin:6px auto 0}
 .err{color:var(--bad);font-size:.9rem;min-height:1.2em;margin:4px 0 10px}
 
-/* app */
-header{position:sticky;top:0;z-index:5;background:var(--plum);color:#fff;padding:12px 16px 14px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.listbtn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-width:0}
-.listbtn small{opacity:.7;font-size:.75rem}
-.listbtn b{font-family:'Bricolage Grotesque',sans-serif;font-size:1.25rem;font-weight:800;max-width:62vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.iconbtn{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.12);display:grid;place-items:center;color:#fff}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.tab{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 8px;border-radius:14px;background:rgba(255,255,255,.1);color:#fff;font-weight:600;transition:background .2s}
-.tab svg{width:26px;height:26px}
-.tab .n{font-size:.8rem;opacity:.8}
-.tab.on.good{background:var(--good);color:#fff}
-.tab.on.bad{background:var(--bad);color:#fff}
-.tab.on .n{opacity:.95}
-body:not(.bad) .tab.good, body.bad .tab.bad{box-shadow:0 0 0 2px rgba(255,255,255,.55)}
+/* barra e botoes */
+.bar{position:sticky;top:0;z-index:5;background:var(--plum);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--accent)}
+.bar h2{font-size:1.25rem;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{width:42px;height:42px;flex:none;border-radius:12px;background:rgba(255,255,255,.12);display:grid;place-items:center;color:#fff}
+.iconbtn svg{width:22px;height:22px}
+.iconbtn.dark{background:var(--surface);border:1.5px solid var(--line);color:var(--ink)}
 
-.tools{padding:14px 16px 4px}
+/* tela inicial */
+.home{max-width:520px;margin:0 auto;padding:28px 20px}
+.homeTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:28px}
+.homeTop small{color:var(--muted);font-size:.95rem}
+.homeTop h1{font-size:2rem;line-height:1.1;font-weight:800;word-break:break-word}
+.bigs{display:grid;gap:16px}
+.big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:190px;border-radius:24px;color:var(--on);font-family:'Bricolage Grotesque',sans-serif;font-size:1.5rem;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.big.good{background:var(--good)}
+.big.bad{background:var(--bad)}
+.big svg{width:64px;height:64px}
+
+/* categorias e produtos */
+.tools{padding:14px 16px 4px;max-width:620px;margin:0 auto}
 .search{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 4px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;padding:8px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--surface);font-size:.9rem}
-.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
-
-main{padding:8px 16px}
-.cat{margin-top:18px}
-.cat h3{font-size:1rem;display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--accent);padding-bottom:6px;margin-bottom:8px}
-.cat h3 small{color:var(--muted);font-family:'Figtree';font-weight:500}
+main{padding:8px 16px;max-width:620px;margin:0 auto}
+.newbtn{display:flex;align-items:center;justify-content:center;width:100%;padding:16px;border-radius:18px;background:var(--accent);color:var(--on);font-weight:800;letter-spacing:.04em;margin:8px 0 16px;box-shadow:0 6px 18px rgba(0,0,0,.16)}
+.catcard{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 12px 14px 16px;margin-bottom:12px;cursor:pointer}
+.catinfo{flex:1;min-width:0}
+.catinfo b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-style:italic;font-weight:800;text-transform:uppercase;font-size:1.15rem;overflow-wrap:anywhere}
+.catinfo span{display:block;color:var(--accent);font-weight:700;font-size:.8rem;text-transform:uppercase;margin-top:3px}
+.ic{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center}
+.ic svg{width:26px;height:26px}
+.ic.add{color:var(--good)}
+.ic.edit{color:#6b8ad6}
+.ic.del{color:var(--bad)}
 .item{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
 .item b{display:block;font-weight:600}
 .item .note{color:var(--muted);font-size:.92rem;margin-top:2px}
+.item .price{color:var(--accent);font-weight:600;font-size:.92rem;margin-top:4px}
 .item .by{color:var(--muted);font-size:.76rem;margin-top:6px}
 .empty{text-align:center;color:var(--muted);padding:48px 20px}
 .empty b{display:block;color:var(--ink);font-size:1.1rem;margin-bottom:6px}
 
-.fab{position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom));width:62px;height:62px;border-radius:20px;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.28)}
-.fab svg{width:28px;height:28px}
+/* configuracoes */
+.set{padding-top:16px}
+.set h3{font-size:1.1rem;margin:0 0 10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.card.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.k{color:var(--muted);font-size:.8rem;margin-bottom:2px}
+.v{font-weight:600;word-break:break-all}
 
 /* sheets */
 .overlay{position:fixed;inset:0;background:rgba(10,5,12,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--bg);width:100%;max-width:520px;max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom));animation:up .22s ease-out}
 @keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion:reduce){.sheet{animation:none}.tab{transition:none}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
 .sheet h2{font-size:1.3rem;margin-bottom:16px}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .seg button{padding:12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;display:flex;gap:8px;align-items:center;justify-content:center}
 .seg svg{width:20px;height:20px}
-.seg .g.on{background:var(--good);border-color:var(--good);color:#fff}
-.seg .b.on{background:var(--bad);border-color:var(--bad);color:#fff}
+.seg .g.on{background:var(--good);border-color:var(--good);color:var(--on)}
+.seg .b.on{background:var(--bad);border-color:var(--bad);color:var(--on)}
 .listrow{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);margin-bottom:8px}
 .listrow.on{border-color:var(--plum);box-shadow:inset 0 0 0 1px var(--plum)}
 .listrow small{color:var(--muted)}
 .code{font-family:'Bricolage Grotesque',sans-serif;font-size:2rem;font-weight:800;letter-spacing:.18em;text-align:center;padding:14px;border-radius:14px;background:var(--surface);border:1.5px dashed var(--muted);margin:10px 0 12px}
+.chk{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:8px}
+.chk input{width:22px;height:22px;accent-color:var(--good);flex:none}
 .sep{height:1px;background:var(--line);margin:20px 0}
-.who{color:var(--muted);font-size:.85rem;margin-bottom:10px;word-break:break-all}
-.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem}
+.who{color:var(--muted);font-size:.85rem;margin:0 0 10px;word-break:break-word}
+.toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem;max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
@@ -121,37 +134,7 @@ main{padding:8px 16px}
 </section>
 
 <!-- ============ APP ============ -->
-<div id="app" class="hidden">
-  <header>
-    <div class="top">
-      <button class="listbtn" id="openLists" aria-label="Trocar ou compartilhar lista">
-        <small>Lista · toque para trocar ou compartilhar</small>
-        <b id="listName">—</b>
-      </button>
-      <button class="iconbtn" id="openLists2" aria-label="Compartilhar">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
-      </button>
-    </div>
-    <div class="tabs">
-      <button class="tab good on" id="tabGood">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zM7 11l4-8a2.5 2.5 0 0 1 2.5 2.5V9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/></svg>
-        <span>Marcas boas <span class="n" id="nGood"></span></span>
-      </button>
-      <button class="tab bad" id="tabBad">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleY(-1)"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zM7 11l4-8a2.5 2.5 0 0 1 2.5 2.5V9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/></svg>
-        <span>Marcas ruins <span class="n" id="nBad"></span></span>
-      </button>
-    </div>
-  </header>
-
-  <div class="tools"><input class="search" id="search" type="search" placeholder="Buscar marca ou observação"></div>
-  <div class="chips" id="chips"></div>
-  <main id="content"></main>
-
-  <button class="fab" id="fab" aria-label="Adicionar produto">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-  </button>
-</div>
+<div id="app" class="hidden"><div id="view"></div></div>
 
 <div id="modal"></div>
 <div id="toast" class="toast hidden"></div>
@@ -161,9 +144,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   GoogleAuthProvider, signInWithPopup, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot,
-  query, where, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  query, where, serverTimestamp, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ====== COLE AQUI A CONFIGURAÇÃO DO SEU PROJETO FIREBASE ====== */
+/* ====== CONFIGURAÇÃO DO PROJETO FIREBASE ====== */
 const firebaseConfig = {
   apiKey: "AIzaSyB4CUawMDCq8hMBdSjQSuGxzqciZz8Lb2k",
   authDomain: "marcas-boas-ruins.firebaseapp.com",
@@ -183,16 +166,46 @@ const DEFAULT_CATS = ["Vinho","Cerveja","Refrigerante","Suco","Congelado","Sushi
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const byName = (a,b) => a.name.localeCompare(b.name);
+const catOf = i => i.category || "Sem categoria";
+const brl = n => Number(n).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+function parsePrice(s){
+  s = String(s||"").trim().replace(/[R$\s]/g,"");
+  if(!s) return null;
+  if(s.includes(",")) s = s.replace(/\./g,"").replace(",",".");
+  const n = parseFloat(s);
+  return Number.isFinite(n) && n >= 0 ? n : NaN;
+}
 
 let user = null, lists = [], listId = null, items = [];
-let tab = "good", catFilter = "", q = "";
-let unsubLists = null, unsubItems = null;
+let view = "home", curType = "good", curCat = null, q = "", depth = 0;
+let unsubLists = null, unsubItems = null, watchedId = null;
 let signup = false;
 
-const ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zM7 11l4-8a2.5 2.5 0 0 1 2.5 2.5V9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/></svg>';
-const ICON_DOWN = ICON_UP.replace('<svg ','<svg style="transform:scaleY(-1)" ');
+const SV = (inner, extra="") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${inner}</svg>`;
+const THUMB = '<path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zM7 11l4-8a2.5 2.5 0 0 1 2.5 2.5V9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/>';
+const ICON_UP = SV(THUMB);
+const ICON_DOWN = SV(THUMB,'style="transform:scaleY(-1)"');
+const ICON_GEAR = SV('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>');
+const ICON_BACK = SV('<path d="M15 18l-6-6 6-6"/>');
+const ICON_ADD = SV('<circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>');
+const ICON_EDIT = SV('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>');
+const ICON_TRASH = SV('<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/>');
+const ICON_SHARE = SV('<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>');
 
-function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.remove("hidden");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("hidden"),2400)}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.remove("hidden");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("hidden"),2600)}
+const myName = () => user?.displayName || (user?.email||"").split("@")[0] || "";
+const curList = () => lists.find(l=>l.id===listId);
+function allowedCats(){
+  const l = curList();
+  if(!l || l.ownerId===user.uid) return null;
+  const a = l.access?.[user.uid];
+  return Array.isArray(a) ? a : null;
+}
+function visible(){
+  const a = allowedCats();
+  return a ? items.filter(i=>a.includes(catOf(i))) : items;
+}
 
 /* ---------- AUTH ---------- */
 function drawAuth(){
@@ -239,15 +252,35 @@ $("#aGoogle").onclick = async () => {
 onAuthStateChanged(auth, u => {
   user = u;
   if(!u){
-    unsubLists?.(); unsubItems?.(); lists=[]; items=[]; listId=null;
+    unsubLists?.(); unsubItems?.(); lists=[]; items=[]; listId=null; watchedId=null;
     $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); drawAuth();
     return;
   }
   $("#auth").classList.add("hidden"); $("#app").classList.remove("hidden");
+  view="home"; curCat=null; q=""; depth=0;
+  history.replaceState({view:"home",curType,curCat:null,d:0},"");
+  shell();
   startLists();
-  const params = new URLSearchParams(location.search);
-  const c = params.get("codigo");
-  if(c){ history.replaceState({},"",location.pathname); joinByCode(c); }
+  const c = new URLSearchParams(location.search).get("codigo");
+  if(c){ history.replaceState({view:"home",curType,curCat:null,d:0},"",location.pathname); joinByCode(c); }
+});
+
+/* ---------- NAVEGAÇÃO ---------- */
+function go(v,o={}){
+  view=v; if(o.type) curType=o.type; curCat=o.cat ?? null; q="";
+  closeModal(); depth++;
+  history.pushState({view,curType,curCat,d:depth},"");
+  shell(); window.scrollTo(0,0);
+}
+function goBack(parent){
+  if(depth>0) history.back();
+  else { view=parent; curCat=null; q=""; shell(); }
+}
+window.addEventListener("popstate", e => {
+  const s = e.state;
+  if(s){ view=s.view; curType=s.curType||curType; curCat=s.curCat||null; depth=s.d||0; }
+  else { view="home"; curCat=null; depth=0; }
+  if(user){ q=""; closeModal(); shell(); }
 });
 
 /* ---------- LISTAS ---------- */
@@ -256,108 +289,246 @@ function startLists(){
   unsubLists = onSnapshot(query(collection(db,"lists"),where("members","array-contains",user.uid)), snap => {
     lists = snap.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>a.name.localeCompare(b.name));
     if(!lists.length){
-      listId=null; items=[]; unsubItems?.(); render();
-      if(!startLists.asked){ startLists.asked=true; openLists(true); }
+      listId=null; items=[]; unsubItems?.(); watchedId=null; refresh();
+      if(!startLists.asked){ startLists.asked=true; go("settings"); toast("Crie sua primeira lista"); }
       return;
     }
     const saved = localStorage.getItem("marcas:list");
     if(!lists.find(l=>l.id===listId)) listId = lists.find(l=>l.id===saved)?.id || lists[0].id;
-    watchItems(); render();
+    watchItems(); refresh();
   }, e => console.error(e));
 }
 function watchItems(){
-  unsubItems?.();
+  if(!listId) return;
+  if(watchedId===listId && unsubItems) return;
+  unsubItems?.(); watchedId=listId;
   unsubItems = onSnapshot(collection(db,"lists",listId,"items"), snap => {
     items = snap.docs.map(d=>({id:d.id,...d.data()}));
-    render();
+    refresh();
   });
 }
 function selectList(id){
-  listId=id; localStorage.setItem("marcas:list",id); catFilter=""; closeModal(); watchItems(); render();
+  listId=id; localStorage.setItem("marcas:list",id); watchedId=null; items=[]; watchItems(); refresh();
 }
-const curList = () => lists.find(l=>l.id===listId);
-
 function genCode(){
   const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s="";
   for(let i=0;i<6;i++) s+=a[Math.floor(Math.random()*a.length)];
   return s;
 }
 async function createList(name){
-  name = name.trim(); if(!name) return;
-  const code = genCode();
-  const ref = await addDoc(collection(db,"lists"),{name,ownerId:user.uid,members:[user.uid],code,createdAt:serverTimestamp()});
-  await setDoc(doc(db,"invites",code),{listId:ref.id});
-  localStorage.setItem("marcas:list",ref.id); listId=ref.id;
-  toast("Lista criada");
+  name = name.trim(); if(!name) return false;
+  try{
+    const code = genCode();
+    const ref = await addDoc(collection(db,"lists"),{name,ownerId:user.uid,members:[user.uid],code,createdAt:serverTimestamp()});
+    await setDoc(doc(db,"invites",code),{listId:ref.id,categories:null,createdBy:user.uid});
+    localStorage.setItem("marcas:list",ref.id); listId=ref.id;
+    toast("Lista criada"); return true;
+  }catch(e){ console.error(e); toast("Não foi possível criar a lista"); return false; }
 }
 async function joinByCode(code){
-  code = String(code||"").trim().toUpperCase(); if(!code) return;
+  code = String(code||"").trim().toUpperCase(); if(!code) return false;
   try{
     const inv = await getDoc(doc(db,"invites",code));
     if(!inv.exists()){ toast("Código não encontrado"); return false; }
-    const id = inv.data().listId;
-    await updateDoc(doc(db,"lists",id),{members:arrayUnion(user.uid)});
-    localStorage.setItem("marcas:list",id); listId=id; closeModal();
-    toast("Você entrou na lista"); return true;
+    const {listId:id, categories} = inv.data();
+    const ex = lists.find(l=>l.id===id);
+    const cur = ex?.access?.[user.uid];
+    if(ex && (ex.ownerId===user.uid || !cur || cur==="all")){
+      selectList(id); toast("Você já está nessa lista"); go("home"); return true;
+    }
+    let acc = Array.isArray(categories) ? categories : "all";
+    if(ex && Array.isArray(cur) && Array.isArray(acc)) acc = [...new Set([...cur,...acc])];
+    await updateDoc(doc(db,"lists",id),{members:arrayUnion(user.uid),[`access.${user.uid}`]:acc});
+    localStorage.setItem("marcas:list",id); listId=id; watchedId=null;
+    toast("Você entrou na lista"); go("home"); return true;
   }catch(e){ console.error(e); toast("Não foi possível entrar na lista"); return false; }
 }
 async function leaveList(){
   if(!confirm("Sair desta lista? Você deixa de vê-la, mas as outras pessoas continuam com ela.")) return;
-  const id = listId; listId=null; closeModal();
-  await updateDoc(doc(db,"lists",id),{members:arrayRemove(user.uid)});
+  const id = listId; listId=null;
+  try{ await updateDoc(doc(db,"lists",id),{members:arrayRemove(user.uid)}); go("home"); }
+  catch(e){ console.error(e); listId=id; toast("Não foi possível sair da lista"); }
 }
 
-/* ---------- RENDER ---------- */
-function render(){
-  document.body.classList.toggle("bad",tab==="bad");
-  $("#tabGood").classList.toggle("on",tab==="good");
-  $("#tabBad").classList.toggle("on",tab==="bad");
+/* ---------- TELAS ---------- */
+function refresh(){
+  if(!user) return;
+  if(view==="home") drawHome();
+  else if(view==="cats") renderCats();
+  else if(view==="items") renderItems();
+  else if(view==="settings") renderListsBlock();
+}
+function shell(){
+  document.body.classList.toggle("bad",(view==="cats"||view==="items") && curType==="bad");
+  if(view==="home") drawHome();
+  else if(view==="cats") drawCats();
+  else if(view==="items") drawItems();
+  else drawSettings();
+}
+
+function drawHome(){
   const l = curList();
-  $("#listName").textContent = l ? l.name : "Sem lista";
-  $("#nGood").textContent = items.filter(i=>i.type==="good").length;
-  $("#nBad").textContent = items.filter(i=>i.type==="bad").length;
+  $("#view").innerHTML = `
+    <div class="home">
+      <div class="homeTop">
+        <div><small>Olá,</small><h1>${esc(myName())}</h1></div>
+        <button class="iconbtn dark" id="gear" aria-label="Configurações">${ICON_GEAR}</button>
+      </div>
+      ${l ? "" : `<div class="card"><b>Você ainda não tem uma lista</b><p class="who">Toque na engrenagem para criar uma ou entrar com um código.</p></div>`}
+      <div class="bigs">
+        <button class="big good" id="bGood">${ICON_UP}<span>Marcas boas</span></button>
+        <button class="big bad" id="bBad">${ICON_DOWN}<span>Marcas ruins</span></button>
+      </div>
+    </div>`;
+  $("#gear").onclick = () => go("settings");
+  $("#bGood").onclick = () => curList() ? go("cats",{type:"good"}) : go("settings");
+  $("#bBad").onclick = () => curList() ? go("cats",{type:"bad"}) : go("settings");
+}
 
-  const mine = items.filter(i=>i.type===tab);
-  const cats = [...new Set(mine.map(i=>i.category||"Sem categoria"))].sort((a,b)=>a.localeCompare(b));
-  if(catFilter && !cats.includes(catFilter)) catFilter="";
-  $("#chips").innerHTML = cats.length>1
-    ? `<button class="chip ${catFilter?"":"on"}" data-c="">Todas</button>` + cats.map(c=>`<button class="chip ${catFilter===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")
-    : "";
-  $("#chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{catFilter=b.dataset.c;render()});
+function drawCats(){
+  $("#view").innerHTML = `
+    <header class="bar">
+      <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
+      <h2>${curType==="good"?"Marcas boas":"Marcas ruins"}</h2>
+    </header>
+    <div class="tools"><input class="search" id="search" type="search" placeholder="Buscar produto ou categoria"></div>
+    <main><button class="newbtn" id="newP">+ NOVO PRODUTO</button><div id="content"></div></main>`;
+  $("#back").onclick = () => goBack("home");
+  $("#search").oninput = e => { q=e.target.value; renderCats(); };
+  $("#newP").onclick = () => openItem(null,"");
+  renderCats();
+}
+function bindItems(el){
+  el.querySelectorAll(".item").forEach(b=>b.onclick=()=>openItem(items.find(i=>i.id===b.dataset.id)));
+}
+const itemHtml = (i,showCat) => `
+  <button class="item" data-id="${i.id}">
+    <b>${esc(i.name)}</b>
+    ${showCat?`<div class="note">${esc(catOf(i))}</div>`:""}
+    ${i.note?`<div class="note">${esc(i.note)}</div>`:""}
+    ${i.price!=null?`<div class="price">Pago: ${brl(i.price)}</div>`:""}
+    <div class="by">${esc(i.addedByName||"")}</div>
+  </button>`;
 
+function renderCats(){
+  const el = $("#content"); if(!el) return;
+  if(!curList()){ el.innerHTML = `<div class="empty"><b>Você ainda não tem uma lista</b>Abra as configurações para criar uma.</div>`; return; }
+  const mine = visible().filter(i=>i.type===curType);
   const nq = norm(q);
-  const shown = mine.filter(i =>
-    (!catFilter || (i.category||"Sem categoria")===catFilter) &&
-    (!nq || norm(i.name).includes(nq) || norm(i.note).includes(nq)));
-
-  if(!l){
-    $("#content").innerHTML = `<div class="empty"><b>Você ainda não tem uma lista</b>Toque no nome acima para criar uma ou entrar com o código que seu par enviou.</div>`;
-    return;
+  if(nq){
+    const hits = mine.filter(i=>norm(i.name).includes(nq)||norm(i.note).includes(nq)||norm(catOf(i)).includes(nq)).sort(byName);
+    el.innerHTML = hits.length ? hits.map(i=>itemHtml(i,true)).join("") : `<div class="empty"><b>Nada encontrado</b>Tente outra busca.</div>`;
+    bindItems(el); return;
   }
-  if(!shown.length){
-    $("#content").innerHTML = mine.length
-      ? `<div class="empty"><b>Nada encontrado</b>Tente outra busca ou outra categoria.</div>`
-      : `<div class="empty"><b>${tab==="good"?"Nenhuma marca boa ainda":"Nenhuma marca ruim ainda"}</b>Toque no + para adicionar o primeiro produto.</div>`;
+  if(!mine.length){
+    el.innerHTML = `<div class="empty"><b>${curType==="good"?"Nenhuma marca boa ainda":"Nenhuma marca ruim ainda"}</b>Toque em “Novo produto” para adicionar o primeiro.</div>`;
     return;
   }
   const groups = {};
-  shown.forEach(i=>{(groups[i.category||"Sem categoria"] ||= []).push(i)});
-  $("#content").innerHTML = Object.keys(groups).sort((a,b)=>a.localeCompare(b)).map(c=>{
-    const rows = groups[c].sort((a,b)=>a.name.localeCompare(b.name)).map(i=>`
-      <button class="item" data-id="${i.id}">
-        <b>${esc(i.name)}</b>
-        ${i.note?`<div class="note">${esc(i.note)}</div>`:""}
-        <div class="by">${esc(i.addedByName||"")}</div>
-      </button>`).join("");
-    return `<section class="cat"><h3>${esc(c)} <small>${groups[c].length}</small></h3>${rows}</section>`;
-  }).join("");
-  $("#content").querySelectorAll(".item").forEach(b=>b.onclick=()=>openItem(items.find(i=>i.id===b.dataset.id)));
+  mine.forEach(i=>{(groups[catOf(i)] ||= []).push(i)});
+  el.innerHTML = Object.keys(groups).sort((a,b)=>a.localeCompare(b)).map(c=>`
+    <div class="catcard" data-c="${esc(c)}" role="button" tabindex="0">
+      <div class="catinfo"><b>${esc(c)}</b><span>${groups[c].length} ${groups[c].length===1?"produto":"produtos"}</span></div>
+      <button class="ic add" data-act="add" aria-label="Adicionar produto em ${esc(c)}">${ICON_ADD}</button>
+      <button class="ic edit" data-act="edit" aria-label="Renomear categoria">${ICON_EDIT}</button>
+      <button class="ic del" data-act="del" aria-label="Excluir categoria">${ICON_TRASH}</button>
+    </div>`).join("");
+  el.querySelectorAll(".catcard").forEach(card=>{
+    const c = card.dataset.c;
+    card.onclick = () => go("items",{cat:c});
+    card.querySelectorAll(".ic").forEach(b=>b.onclick = e => {
+      e.stopPropagation();
+      if(b.dataset.act==="add") openItem(null,c);
+      else if(b.dataset.act==="edit") renameCat(c);
+      else deleteCat(c);
+    });
+  });
 }
-$("#tabGood").onclick = () => { tab="good"; catFilter=""; render(); };
-$("#tabBad").onclick  = () => { tab="bad";  catFilter=""; render(); };
-$("#search").oninput = e => { q=e.target.value; render(); };
-$("#fab").onclick = () => listId ? openItem(null) : openLists(true);
-$("#openLists").onclick = $("#openLists2").onclick = () => openLists(false);
+
+function drawItems(){
+  $("#view").innerHTML = `
+    <header class="bar">
+      <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
+      <h2>${esc(curCat||"")}</h2>
+    </header>
+    <main><button class="newbtn" id="newP">+ NOVO PRODUTO</button><div id="content"></div></main>`;
+  $("#back").onclick = () => goBack("cats");
+  $("#newP").onclick = () => openItem(null,curCat);
+  renderItems();
+}
+function renderItems(){
+  const el = $("#content"); if(!el) return;
+  const mine = visible().filter(i=>i.type===curType && catOf(i)===curCat).sort(byName);
+  el.innerHTML = mine.length ? mine.map(i=>itemHtml(i,false)).join("") : `<div class="empty"><b>Nenhum produto aqui</b>Toque em “Novo produto” para adicionar.</div>`;
+  bindItems(el);
+}
+
+async function renameCat(c){
+  const n = (prompt("Novo nome da categoria:",c)||"").trim();
+  if(!n || n===c) return;
+  try{
+    const b = writeBatch(db);
+    items.filter(i=>i.type===curType && catOf(i)===c).forEach(i=>b.update(doc(db,"lists",listId,"items",i.id),{category:n}));
+    await b.commit(); toast("Categoria renomeada");
+  }catch(e){ console.error(e); toast("Não foi possível renomear"); }
+}
+async function deleteCat(c){
+  const mine = items.filter(i=>i.type===curType && catOf(i)===c);
+  if(!confirm(`Excluir a categoria “${c}” e os ${mine.length} produto(s) dela?`)) return;
+  try{
+    const b = writeBatch(db);
+    mine.forEach(i=>b.delete(doc(db,"lists",listId,"items",i.id)));
+    await b.commit(); toast("Categoria excluída");
+  }catch(e){ console.error(e); toast("Não foi possível excluir"); }
+}
+
+/* ---------- CONFIGURAÇÕES ---------- */
+function drawSettings(){
+  const l = curList();
+  $("#view").innerHTML = `
+    <header class="bar">
+      <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
+      <h2>Configurações</h2>
+    </header>
+    <main class="set">
+      <div class="card"><div class="k">Nome</div><div class="v">${esc(myName())}</div></div>
+      <div class="card"><div class="k">E-mail cadastrado</div><div class="v">${esc(user.email||"")}</div></div>
+      <div class="card row">
+        <div><div class="v">Compartilhar categorias</div><div class="k">Escolha uma, várias ou todas</div></div>
+        <button class="iconbtn dark" id="shareCats" aria-label="Compartilhar categorias">${ICON_SHARE}</button>
+      </div>
+      <div class="sep"></div>
+      <h3>Suas listas</h3>
+      <div id="listsBlock"></div>
+      <div class="sep"></div>
+      <h3>Entrar com código</h3>
+      <label class="field"><span>Código recebido</span><input id="jCode" maxlength="6" autocapitalize="characters" placeholder="Ex.: K7M2QX"></label>
+      <button class="btn" id="jGo">Entrar na lista</button>
+      <div class="sep"></div>
+      <h3>Nova lista</h3>
+      <label class="field"><span>Nome da lista</span><input id="nName" placeholder="Ex.: Nossas marcas"></label>
+      <button class="btn" id="nGo">Criar lista</button>
+      <div class="sep"></div>
+      ${l?`<button class="btn ghost" id="lvList">Sair desta lista</button>`:""}
+      <button class="btn ghost" id="lOut">Sair da conta</button>
+    </main>`;
+  $("#back").onclick = () => goBack("home");
+  $("#shareCats").onclick = openShare;
+  $("#jGo").onclick = () => joinByCode($("#jCode").value);
+  $("#nGo").onclick = async () => { if(await createList($("#nName").value)) go("home"); };
+  $("#lOut").onclick = () => signOut(auth);
+  if(l) $("#lvList").onclick = leaveList;
+  renderListsBlock();
+}
+function renderListsBlock(){
+  const el = $("#listsBlock"); if(!el) return;
+  el.innerHTML = lists.length ? lists.map(x=>`
+    <button class="listrow ${x.id===listId?"on":""}" data-id="${x.id}">
+      <span><b>${esc(x.name)}</b><br><small>${x.members.length} ${x.members.length===1?"pessoa":"pessoas"}</small></span>
+      <span>${x.id===listId?"✓":""}</span>
+    </button>`).join("") : `<p class="who">Nenhuma lista ainda. Crie uma abaixo.</p>`;
+  el.querySelectorAll(".listrow").forEach(b=>b.onclick=()=>{ selectList(b.dataset.id); toast("Lista selecionada"); });
+}
 
 /* ---------- MODAIS ---------- */
 function closeModal(){ $("#modal").innerHTML=""; }
@@ -366,10 +537,14 @@ function showSheet(html){
   $("#ov").addEventListener("click",e=>{ if(e.target.id==="ov") closeModal(); });
 }
 
-function openItem(it){
+function openItem(it,presetCat){
   const isNew = !it;
-  let type = it?.type || tab;
-  const allCats = [...new Set([...DEFAULT_CATS, ...items.map(i=>i.category).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
+  let type = it?.type || curType;
+  const a = allowedCats();
+  const allCats = a ? [...a].sort((x,y)=>x.localeCompare(y))
+    : [...new Set([...DEFAULT_CATS, ...items.map(i=>i.category).filter(Boolean)])].sort((x,y)=>x.localeCompare(y));
+  const catVal = it ? (it.category||"") : (presetCat && presetCat!=="Sem categoria" ? presetCat : "");
+  const priceVal = it?.price!=null ? String(it.price).replace(".",",") : "";
   showSheet(`
     <h2>${isNew?"Adicionar produto":"Editar produto"}</h2>
     <div class="seg">
@@ -377,8 +552,9 @@ function openItem(it){
       <button class="b" id="tB">${ICON_DOWN} Ruim</button>
     </div>
     <label class="field"><span>Produto ou marca</span><input id="fName" value="${esc(it?.name||"")}" placeholder="Ex.: Vinho Balduzzi" autocomplete="off"></label>
-    <label class="field"><span>Categoria</span><input id="fCat" list="catList" value="${esc(it?.category||"")}" placeholder="Ex.: Vinho, Cerveja, Congelado" autocomplete="off"></label>
+    <label class="field"><span>Categoria</span><input id="fCat" list="catList" value="${esc(catVal)}" placeholder="Ex.: Vinho, Cerveja, Congelado" autocomplete="off"></label>
     <datalist id="catList">${allCats.map(c=>`<option value="${esc(c)}">`).join("")}</datalist>
+    <label class="field"><span>Valor pago (opcional)</span><input id="fPrice" inputmode="decimal" value="${esc(priceVal)}" placeholder="Ex.: 12,90" autocomplete="off"></label>
     <label class="field"><span>Observação (opcional)</span><textarea id="fNote" placeholder="Ex.: muito doce, aguado, não é dos melhores">${esc(it?.note||"")}</textarea></label>
     <div class="err" id="fErr"></div>
     <button class="btn accent" id="fSave">Salvar</button>
@@ -396,61 +572,63 @@ function openItem(it){
   $("#fSave").onclick = async () => {
     const name = $("#fName").value.trim();
     if(!name){ $("#fErr").textContent="Digite o nome do produto."; return; }
-    const data = {name, type, category:$("#fCat").value.trim(), note:$("#fNote").value.trim()};
+    const price = parsePrice($("#fPrice").value);
+    if(Number.isNaN(price)){ $("#fErr").textContent="Valor pago inválido. Use números, ex.: 12,90."; return; }
+    const data = {name, type, category:$("#fCat").value.trim(), note:$("#fNote").value.trim(), price};
     try{
       if(isNew){
         await addDoc(collection(db,"lists",listId,"items"),{...data,addedBy:user.uid,addedByName:user.displayName||user.email,createdAt:serverTimestamp()});
       } else {
         await updateDoc(doc(db,"lists",listId,"items",it.id),{...data,editedByName:user.displayName||user.email});
       }
-      tab = type; closeModal(); render();
+      closeModal();
+      if(type!==curType){ curType=type; shell(); }
     }catch(e){ console.error(e); $("#fErr").textContent="Não foi possível salvar. Verifique a conexão."; }
   };
   if(!isNew) $("#fDel").onclick = async () => {
     if(!confirm(`Excluir “${it.name}”?`)) return;
-    await deleteDoc(doc(db,"lists",listId,"items",it.id)); closeModal();
+    try{ await deleteDoc(doc(db,"lists",listId,"items",it.id)); closeModal(); }
+    catch(e){ console.error(e); toast("Não foi possível excluir"); }
   };
 }
 
-function openLists(firstTime){
+function openShare(){
   const l = curList();
-  const rows = lists.map(x=>`
-    <button class="listrow ${x.id===listId?"on":""}" data-id="${x.id}">
-      <span><b>${esc(x.name)}</b><br><small>${x.members.length} ${x.members.length===1?"pessoa":"pessoas"}</small></span>
-      <span>${x.id===listId?"✓":""}</span>
-    </button>`).join("");
+  if(!l){ toast("Crie uma lista primeiro"); return; }
+  const cats = [...new Set(visible().map(catOf))].sort((a,b)=>a.localeCompare(b));
+  if(!cats.length){ toast("Cadastre produtos antes de compartilhar categorias"); return; }
   showSheet(`
-    <h2>${firstTime && !lists.length ? "Comece por aqui" : "Suas listas"}</h2>
-    ${rows}
-    ${l ? `
-      <div class="sep"></div>
-      <h2>Compartilhar “${esc(l.name)}”</h2>
-      <p class="who">Envie o código abaixo. Quem entrar com ele passa a ver e editar esta lista.</p>
-      <div class="code">${esc(l.code)}</div>
-      <button class="btn accent" id="shWa">Enviar pelo WhatsApp</button>
-      <button class="btn ghost" id="shCopy">Copiar link</button>
-      <div class="sep"></div>` : ""}
-    <h2>Entrar com código</h2>
-    <label class="field"><span>Código da lista</span><input id="jCode" maxlength="6" autocapitalize="characters" placeholder="Ex.: K7M2QX"></label>
-    <button class="btn" id="jGo">Entrar na lista</button>
-    <div class="sep"></div>
-    <h2>Nova lista</h2>
-    <label class="field"><span>Nome da lista</span><input id="nName" placeholder="Ex.: Nossas marcas"></label>
-    <button class="btn" id="nGo">Criar lista</button>
-    <div class="sep"></div>
-    <p class="who">Conectado como ${esc(user.displayName||"")} (${esc(user.email||"")})</p>
-    ${l?`<button class="btn ghost" id="lvList">Sair desta lista</button>`:""}
-    <button class="btn ghost" id="lOut">Sair da conta</button>`);
-  $("#modal").querySelectorAll(".listrow").forEach(b=>b.onclick=()=>selectList(b.dataset.id));
-  const link = l ? `${location.origin}${location.pathname}?codigo=${l.code}` : "";
-  if(l){
-    $("#shWa").onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(`Entra na nossa lista “${l.name}”: ${link}\nCódigo: ${l.code}`)}`,"_blank");
-    $("#shCopy").onclick = async () => { try{await navigator.clipboard.writeText(link);toast("Link copiado")}catch{toast("Código: "+l.code)} };
-    $("#lvList").onclick = leaveList;
-  }
-  $("#jGo").onclick = () => joinByCode($("#jCode").value);
-  $("#nGo").onclick = async () => { await createList($("#nName").value); closeModal(); };
-  $("#lOut").onclick = () => { closeModal(); signOut(auth); };
+    <h2>Compartilhar categorias</h2>
+    <p class="who">Escolha o que a outra pessoa poderá ver e editar.</p>
+    <label class="chk"><input type="checkbox" id="cAll" checked><b>Todas as categorias</b></label>
+    ${cats.map(c=>`<label class="chk"><input type="checkbox" class="cOne" value="${esc(c)}" checked><span>${esc(c)}</span></label>`).join("")}
+    <div class="err" id="sErr"></div>
+    <button class="btn accent" id="sGo">Gerar código</button>
+    <button class="btn ghost" id="sCancel">Cancelar</button>`);
+  const ones = () => [...document.querySelectorAll("#modal .cOne")];
+  $("#cAll").onchange = e => ones().forEach(b=>b.checked=e.target.checked);
+  ones().forEach(b=>b.onchange = () => { $("#cAll").checked = ones().every(x=>x.checked); });
+  $("#sCancel").onclick = closeModal;
+  $("#sGo").onclick = async () => {
+    const sel = ones().filter(b=>b.checked).map(b=>b.value);
+    if(!sel.length){ $("#sErr").textContent="Escolha pelo menos uma categoria."; return; }
+    const all = sel.length===cats.length;
+    const code = genCode();
+    try{
+      await setDoc(doc(db,"invites",code),{listId:l.id,categories:all?null:sel,createdBy:user.uid});
+    }catch(e){ console.error(e); $("#sErr").textContent="Não foi possível gerar o código. Verifique a conexão."; return; }
+    const link = `${location.origin}${location.pathname}?codigo=${code}`;
+    showSheet(`
+      <h2>Código gerado</h2>
+      <p class="who">${all?"Todas as categorias.":"Categorias: "+esc(sel.join(", "))+"."} Quem entrar com este código acessa essas categorias da lista “${esc(l.name)}”.</p>
+      <div class="code">${esc(code)}</div>
+      <button class="btn accent" id="rWa">Enviar pelo WhatsApp</button>
+      <button class="btn ghost" id="rCopy">Copiar link</button>
+      <button class="btn ghost" id="rClose">Fechar</button>`);
+    $("#rWa").onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(`Entra na lista “${l.name}”: ${link}\nCódigo: ${code}`)}`,"_blank");
+    $("#rCopy").onclick = async () => { try{await navigator.clipboard.writeText(link);toast("Link copiado")}catch{toast("Código: "+code)} };
+    $("#rClose").onclick = closeModal;
+  };
 }
 </script>
 </body>
