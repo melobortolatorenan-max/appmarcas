@@ -70,6 +70,7 @@ input,select,textarea{font:inherit;color:inherit}
 .tools{padding:14px 16px 4px;max-width:620px;margin:0 auto}
 .search{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface)}
 main{padding:8px 16px;max-width:620px;margin:0 auto}
+.newbtn svg{width:24px;height:24px}
 .newbtn{display:flex;align-items:center;justify-content:center;width:100%;padding:16px;border-radius:18px;background:var(--accent);color:var(--on);font-weight:800;letter-spacing:.04em;margin:8px 0 16px;box-shadow:0 6px 18px rgba(0,0,0,.16)}
 .catcard{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 12px 14px 16px;margin-bottom:12px;cursor:pointer}
 .catinfo{flex:1;min-width:0}
@@ -375,12 +376,14 @@ function drawHome(){
         <button class="iconbtn dark" id="gear" aria-label="Configurações">${ICON_GEAR}</button>
       </div>
       ${l ? "" : `<div class="card"><b>Você ainda não tem uma lista</b><p class="who">Toque na engrenagem para criar uma ou entrar com um código.</p></div>`}
+      <button class="newbtn" id="homeAdd">${ICON_ADD}&nbsp; ADICIONAR PRODUTO</button>
       <div class="bigs">
         <button class="big good" id="bGood">${ICON_UP}<span>Marcas boas</span></button>
         <button class="big bad" id="bBad">${ICON_DOWN}<span>Marcas ruins</span></button>
       </div>
     </div>`;
   $("#gear").onclick = () => go("settings");
+  $("#homeAdd").onclick = () => curList() ? openItem(null,"") : go("settings");
   $("#bGood").onclick = () => curList() ? go("cats",{type:"good"}) : go("settings");
   $("#bBad").onclick = () => curList() ? go("cats",{type:"bad"}) : go("settings");
 }
