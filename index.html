@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2B1A2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Marcas Boas e Ruins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F5F2; --surface:#FFFFFF; --ink:#241C27; --muted:#6F6674; --line:#E6E1E8;
+  --good:#1F7A4D; --good-soft:#E3F2EA; --bad:#B3262E; --bad-soft:#FBE7E8;
+  --plum:#2B1A2E; --accent:var(--good); --accent-soft:var(--good-soft);
+  --r:16px;
+  font-family:'Figtree',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#171218; --surface:#241C27; --ink:#F2EDF3; --muted:#A99FB0; --line:#3A2F3E;
+    --good:#4FC58A; --good-soft:#17342A; --bad:#F0777E; --bad-soft:#3E1D21; --plum:#120C14;}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-size:16px}
+body{padding-top:env(safe-area-inset-top);padding-bottom:calc(96px + env(safe-area-inset-bottom));min-height:100vh}
+body.bad{--accent:var(--bad);--accent-soft:var(--bad-soft)}
+h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;margin:0}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hidden{display:none!important}
+
+/* login */
+#auth{max-width:420px;margin:0 auto;padding:56px 24px 24px}
+#auth h1{font-size:2.2rem;line-height:1.05;font-weight:800}
+#auth p{color:var(--muted);margin:10px 0 28px}
+.field{display:block;margin-bottom:14px}
+.field span{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface)}
+.field textarea{resize:vertical;min-height:70px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;font-weight:600;background:var(--plum);color:#fff}
+.btn.accent{background:var(--accent);color:#fff}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn.danger{background:transparent;color:var(--bad);border:1.5px solid var(--bad)}
+.btn+.btn{margin-top:10px}
+.link{color:var(--muted);text-decoration:underline;padding:10px;display:block;margin:6px auto 0}
+.err{color:var(--bad);font-size:.9rem;min-height:1.2em;margin:4px 0 10px}
+
+/* app */
+header{position:sticky;top:0;z-index:5;background:var(--plum);color:#fff;padding:12px 16px 14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.listbtn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-width:0}
+.listbtn small{opacity:.7;font-size:.75rem}
+.listbtn b{font-family:'Bricolage Grotesque',sans-serif;font-size:1.25rem;font-weight:800;max-width:62vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.12);display:grid;place-items:center;color:#fff}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.tab{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 8px;border-radius:14px;background:rgba(255,255,255,.1);color:#fff;font-weight:600;transition:background .2s}
+.tab svg{width:26px;height:26px}
+.tab .n{font-size:.8rem;opacity:.8}
+.tab.on.good{background:var(--good);color:#fff}
+.tab.on.bad{background:var(--bad);color:#fff}
+.tab.on .n{opacity:.95}
+body:not(.bad) .tab.good, body.bad .tab.bad{box-shadow:0 0 0 2px rgba(255,255,255,.55)}
+
+.tools{padding:14px 16px 4px}
+.search{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--surface);font-size:.9rem}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+main{padding:8px 16px}
+.cat{margin-top:18px}
+.cat h3{font-size:1rem;display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--accent);padding-bottom:6px;margin-bottom:8px}
+.cat h3 small{color:var(--muted);font-family:'Figtree';font-weight:500}
+.item{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.item b{display:block;font-weight:600}
+.item .note{color:var(--muted);font-size:.92rem;margin-top:2px}
+.item .by{color:var(--muted);font-size:.76rem;margin-top:6px}
+.empty{text-align:center;color:var(--muted);padding:48px 20px}
+.empty b{display:block;color:var(--ink);font-size:1.1rem;margin-bottom:6px}
+
+.fab{position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom));width:62px;height:62px;border-radius:20px;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.fab svg{width:28px;height:28px}
+
+/* sheets */
+.overlay{position:fixed;inset:0;background:rgba(10,5,12,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:520px;max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}.tab{transition:none}}
+.sheet h2{font-size:1.3rem;margin-bottom:16px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.seg button{padding:12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;display:flex;gap:8px;align-items:center;justify-content:center}
+.seg svg{width:20px;height:20px}
+.seg .g.on{background:var(--good);border-color:var(--good);color:#fff}
+.seg .b.on{background:var(--bad);border-color:var(--bad);color:#fff}
+.listrow{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);margin-bottom:8px}
+.listrow.on{border-color:var(--plum);box-shadow:inset 0 0 0 1px var(--plum)}
+.listrow small{color:var(--muted)}
+.code{font-family:'Bricolage Grotesque',sans-serif;font-size:2rem;font-weight:800;letter-spacing:.18em;text-align:center;padding:14px;border-radius:14px;background:var(--surface);border:1.5px dashed var(--muted);margin:10px 0 12px}
+.sep{height:1px;background:var(--line);margin:20px 0}
+.who{color:var(--muted);font-size:.85rem;margin-bottom:10px;word-break:break-all}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="auth" class="hidden">
+  <h1>Marcas boas<br>e ruins</h1>
+  <p>As listas do casal, num lugar só. Entre para ver e editar junto.</p>
+  <label class="field" id="nameField"><span>Seu nome</span><input id="aName" autocomplete="name" placeholder="Como quer aparecer na lista"></label>
+  <label class="field"><span>E-mail</span><input id="aEmail" type="email" autocomplete="email" inputmode="email"></label>
+  <label class="field"><span>Senha</span><input id="aPass" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres"></label>
+  <div class="err" id="aErr"></div>
+  <button class="btn" id="aGo">Entrar</button>
+  <button class="btn ghost" id="aGoogle">Entrar com Google</button>
+  <button class="link" id="aSwitch">Ainda não tenho conta</button>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+  <header>
+    <div class="top">
+      <button class="listbtn" id="openLists" aria-label="Trocar ou compartilhar lista">
+        <small>Lista · toque para trocar ou compartilhar</small>
+        <b id="listName">—</b>
+      </button>
+      <button class="iconbtn" id="openLists2" aria-label="Compartilhar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+      </button>
+    </div>
+    <div class="tabs">
+      <button class="tab good on" id="tabGood">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zM7 11l4-8a2.5 2.5 0 0 1 2.5 2.5V9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/></svg>
+        <span>Marcas boas <span class="n" id="nGood"></span></span>
+      </button>
+      <button class="tab bad" id="tabBad">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleY(-1)"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zM7 11l4-8a2.5 2.5 0 0 1 2.5 2.5V9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/></svg>
+        <span>Marcas ruins <span class="n" id="nBad"></span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="tools"><input class="search" id="search" type="search" placeholder="Buscar marca ou observação"></div>
+  <div class="chips" id="chips"></div>
+  <main id="content"></main>
+
+  <button class="fab" id="fab" aria-label="Adicionar produto">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+</div>
+
+<div id="modal"></div>
+<div id="toast" class="toast hidden"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  GoogleAuthProvider, signInWithPopup, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot,
+  query, where, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ====== COLE AQUI A CONFIGURAÇÃO DO SEU PROJETO FIREBASE ====== */
+const firebaseConfig = {
+  apiKey: "AIzaSyB4CUawMDCq8hMBdSjQSuGxzqciZz8Lb2k",
+  authDomain: "marcas-boas-ruins.firebaseapp.com",
+  projectId: "marcas-boas-ruins",
+  storageBucket: "marcas-boas-ruins.firebasestorage.app",
+  messagingSenderId: "569774940333",
+  appId: "1:569774940333:web:ed69c9a65ca067ecea2624",
+  measurementId: "G-4M75M1LEWY"
+};
+/* =============================================================== */
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const DEFAULT_CATS = ["Vinho","Cerveja","Refrigerante","Suco","Congelado","Sushi","Lanches","Comida","Diversos","Cápsulas de café"];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+
+let user = null, lists = [], listId = null, items = [];
+let tab = "good", catFilter = "", q = "";
+let unsubLists = null, unsubItems = null;
+let signup = false;
+
+const ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zM7 11l4-8a2.5 2.5 0 0 1 2.5 2.5V9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/></svg>';
+const ICON_DOWN = ICON_UP.replace('<svg ','<svg style="transform:scaleY(-1)" ');
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.remove("hidden");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("hidden"),2400)}
+
+/* ---------- AUTH ---------- */
+function drawAuth(){
+  $("#nameField").classList.toggle("hidden",!signup);
+  $("#aGo").textContent = signup ? "Criar conta" : "Entrar";
+  $("#aSwitch").textContent = signup ? "Já tenho conta" : "Ainda não tenho conta";
+  $("#aPass").autocomplete = signup ? "new-password" : "current-password";
+}
+$("#aSwitch").onclick = () => { signup=!signup; $("#aErr").textContent=""; drawAuth(); };
+function authErr(e){
+  const m = {
+    "auth/invalid-credential":"E-mail ou senha incorretos.",
+    "auth/wrong-password":"E-mail ou senha incorretos.",
+    "auth/user-not-found":"E-mail ou senha incorretos.",
+    "auth/email-already-in-use":"Esse e-mail já tem conta. Toque em “Já tenho conta”.",
+    "auth/weak-password":"A senha precisa ter pelo menos 6 caracteres.",
+    "auth/invalid-email":"Esse e-mail não parece válido.",
+    "auth/popup-closed-by-user":"Login cancelado.",
+    "auth/operation-not-allowed":"Esse tipo de login não está ativado no Firebase (Authentication > Método de login).",
+    "auth/unauthorized-domain":"Domínio não autorizado. Adicione o domínio da Vercel em Authentication > Configurações > Domínios autorizados.",
+    "auth/invalid-api-key":"Chave do Firebase inválida. Confira o firebaseConfig no index.html.",
+    "auth/api-key-not-valid.-please-pass-a-valid-api-key.":"Chave do Firebase inválida. Confira o firebaseConfig no index.html.",
+    "auth/network-request-failed":"Sem conexão com o Firebase. Verifique a internet."
+  };
+  console.error(e);
+  $("#aErr").textContent = m[e.code] || ("Não deu certo. Código do erro: " + (e.code || e.message));
+}
+$("#aGo").onclick = async () => {
+  $("#aErr").textContent = "";
+  const email = $("#aEmail").value.trim(), pass = $("#aPass").value;
+  try{
+    if(signup){
+      const name = $("#aName").value.trim();
+      if(!name){ $("#aErr").textContent="Digite seu nome."; return; }
+      const c = await createUserWithEmailAndPassword(auth,email,pass);
+      await updateProfile(c.user,{displayName:name});
+    } else await signInWithEmailAndPassword(auth,email,pass);
+  }catch(e){authErr(e)}
+};
+$("#aGoogle").onclick = async () => {
+  try{ await signInWithPopup(auth,new GoogleAuthProvider()) }catch(e){authErr(e)}
+};
+
+onAuthStateChanged(auth, u => {
+  user = u;
+  if(!u){
+    unsubLists?.(); unsubItems?.(); lists=[]; items=[]; listId=null;
+    $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); drawAuth();
+    return;
+  }
+  $("#auth").classList.add("hidden"); $("#app").classList.remove("hidden");
+  startLists();
+  const params = new URLSearchParams(location.search);
+  const c = params.get("codigo");
+  if(c){ history.replaceState({},"",location.pathname); joinByCode(c); }
+});
+
+/* ---------- LISTAS ---------- */
+function startLists(){
+  unsubLists?.();
+  unsubLists = onSnapshot(query(collection(db,"lists"),where("members","array-contains",user.uid)), snap => {
+    lists = snap.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>a.name.localeCompare(b.name));
+    if(!lists.length){
+      listId=null; items=[]; unsubItems?.(); render();
+      if(!startLists.asked){ startLists.asked=true; openLists(true); }
+      return;
+    }
+    const saved = localStorage.getItem("marcas:list");
+    if(!lists.find(l=>l.id===listId)) listId = lists.find(l=>l.id===saved)?.id || lists[0].id;
+    watchItems(); render();
+  }, e => console.error(e));
+}
+function watchItems(){
+  unsubItems?.();
+  unsubItems = onSnapshot(collection(db,"lists",listId,"items"), snap => {
+    items = snap.docs.map(d=>({id:d.id,...d.data()}));
+    render();
+  });
+}
+function selectList(id){
+  listId=id; localStorage.setItem("marcas:list",id); catFilter=""; closeModal(); watchItems(); render();
+}
+const curList = () => lists.find(l=>l.id===listId);
+
+function genCode(){
+  const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s="";
+  for(let i=0;i<6;i++) s+=a[Math.floor(Math.random()*a.length)];
+  return s;
+}
+async function createList(name){
+  name = name.trim(); if(!name) return;
+  const code = genCode();
+  const ref = await addDoc(collection(db,"lists"),{name,ownerId:user.uid,members:[user.uid],code,createdAt:serverTimestamp()});
+  await setDoc(doc(db,"invites",code),{listId:ref.id});
+  localStorage.setItem("marcas:list",ref.id); listId=ref.id;
+  toast("Lista criada");
+}
+async function joinByCode(code){
+  code = String(code||"").trim().toUpperCase(); if(!code) return;
+  try{
+    const inv = await getDoc(doc(db,"invites",code));
+    if(!inv.exists()){ toast("Código não encontrado"); return false; }
+    const id = inv.data().listId;
+    await updateDoc(doc(db,"lists",id),{members:arrayUnion(user.uid)});
+    localStorage.setItem("marcas:list",id); listId=id; closeModal();
+    toast("Você entrou na lista"); return true;
+  }catch(e){ console.error(e); toast("Não foi possível entrar na lista"); return false; }
+}
+async function leaveList(){
+  if(!confirm("Sair desta lista? Você deixa de vê-la, mas as outras pessoas continuam com ela.")) return;
+  const id = listId; listId=null; closeModal();
+  await updateDoc(doc(db,"lists",id),{members:arrayRemove(user.uid)});
+}
+
+/* ---------- RENDER ---------- */
+function render(){
+  document.body.classList.toggle("bad",tab==="bad");
+  $("#tabGood").classList.toggle("on",tab==="good");
+  $("#tabBad").classList.toggle("on",tab==="bad");
+  const l = curList();
+  $("#listName").textContent = l ? l.name : "Sem lista";
+  $("#nGood").textContent = items.filter(i=>i.type==="good").length;
+  $("#nBad").textContent = items.filter(i=>i.type==="bad").length;
+
+  const mine = items.filter(i=>i.type===tab);
+  const cats = [...new Set(mine.map(i=>i.category||"Sem categoria"))].sort((a,b)=>a.localeCompare(b));
+  if(catFilter && !cats.includes(catFilter)) catFilter="";
+  $("#chips").innerHTML = cats.length>1
+    ? `<button class="chip ${catFilter?"":"on"}" data-c="">Todas</button>` + cats.map(c=>`<button class="chip ${catFilter===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")
+    : "";
+  $("#chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{catFilter=b.dataset.c;render()});
+
+  const nq = norm(q);
+  const shown = mine.filter(i =>
+    (!catFilter || (i.category||"Sem categoria")===catFilter) &&
+    (!nq || norm(i.name).includes(nq) || norm(i.note).includes(nq)));
+
+  if(!l){
+    $("#content").innerHTML = `<div class="empty"><b>Você ainda não tem uma lista</b>Toque no nome acima para criar uma ou entrar com o código que seu par enviou.</div>`;
+    return;
+  }
+  if(!shown.length){
+    $("#content").innerHTML = mine.length
+      ? `<div class="empty"><b>Nada encontrado</b>Tente outra busca ou outra categoria.</div>`
+      : `<div class="empty"><b>${tab==="good"?"Nenhuma marca boa ainda":"Nenhuma marca ruim ainda"}</b>Toque no + para adicionar o primeiro produto.</div>`;
+    return;
+  }
+  const groups = {};
+  shown.forEach(i=>{(groups[i.category||"Sem categoria"] ||= []).push(i)});
+  $("#content").innerHTML = Object.keys(groups).sort((a,b)=>a.localeCompare(b)).map(c=>{
+    const rows = groups[c].sort((a,b)=>a.name.localeCompare(b.name)).map(i=>`
+      <button class="item" data-id="${i.id}">
+        <b>${esc(i.name)}</b>
+        ${i.note?`<div class="note">${esc(i.note)}</div>`:""}
+        <div class="by">${esc(i.addedByName||"")}</div>
+      </button>`).join("");
+    return `<section class="cat"><h3>${esc(c)} <small>${groups[c].length}</small></h3>${rows}</section>`;
+  }).join("");
+  $("#content").querySelectorAll(".item").forEach(b=>b.onclick=()=>openItem(items.find(i=>i.id===b.dataset.id)));
+}
+$("#tabGood").onclick = () => { tab="good"; catFilter=""; render(); };
+$("#tabBad").onclick  = () => { tab="bad";  catFilter=""; render(); };
+$("#search").oninput = e => { q=e.target.value; render(); };
+$("#fab").onclick = () => listId ? openItem(null) : openLists(true);
+$("#openLists").onclick = $("#openLists2").onclick = () => openLists(false);
+
+/* ---------- MODAIS ---------- */
+function closeModal(){ $("#modal").innerHTML=""; }
+function showSheet(html){
+  $("#modal").innerHTML = `<div class="overlay" id="ov"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  $("#ov").addEventListener("click",e=>{ if(e.target.id==="ov") closeModal(); });
+}
+
+function openItem(it){
+  const isNew = !it;
+  let type = it?.type || tab;
+  const allCats = [...new Set([...DEFAULT_CATS, ...items.map(i=>i.category).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
+  showSheet(`
+    <h2>${isNew?"Adicionar produto":"Editar produto"}</h2>
+    <div class="seg">
+      <button class="g" id="tG">${ICON_UP} Boa</button>
+      <button class="b" id="tB">${ICON_DOWN} Ruim</button>
+    </div>
+    <label class="field"><span>Produto ou marca</span><input id="fName" value="${esc(it?.name||"")}" placeholder="Ex.: Vinho Balduzzi" autocomplete="off"></label>
+    <label class="field"><span>Categoria</span><input id="fCat" list="catList" value="${esc(it?.category||"")}" placeholder="Ex.: Vinho, Cerveja, Congelado" autocomplete="off"></label>
+    <datalist id="catList">${allCats.map(c=>`<option value="${esc(c)}">`).join("")}</datalist>
+    <label class="field"><span>Observação (opcional)</span><textarea id="fNote" placeholder="Ex.: muito doce, aguado, não é dos melhores">${esc(it?.note||"")}</textarea></label>
+    <div class="err" id="fErr"></div>
+    <button class="btn accent" id="fSave">Salvar</button>
+    ${isNew?"":`<button class="btn danger" id="fDel">Excluir produto</button>`}
+    <button class="btn ghost" id="fCancel">Cancelar</button>`);
+  const paint = () => {
+    $("#tG").classList.toggle("on",type==="good"); $("#tB").classList.toggle("on",type==="bad");
+    $("#fSave").style.background = type==="good" ? "var(--good)" : "var(--bad)";
+  };
+  paint();
+  $("#tG").onclick = () => { type="good"; paint(); };
+  $("#tB").onclick = () => { type="bad"; paint(); };
+  $("#fCancel").onclick = closeModal;
+  if(isNew) setTimeout(()=>$("#fName").focus(),80);
+  $("#fSave").onclick = async () => {
+    const name = $("#fName").value.trim();
+    if(!name){ $("#fErr").textContent="Digite o nome do produto."; return; }
+    const data = {name, type, category:$("#fCat").value.trim(), note:$("#fNote").value.trim()};
+    try{
+      if(isNew){
+        await addDoc(collection(db,"lists",listId,"items"),{...data,addedBy:user.uid,addedByName:user.displayName||user.email,createdAt:serverTimestamp()});
+      } else {
+        await updateDoc(doc(db,"lists",listId,"items",it.id),{...data,editedByName:user.displayName||user.email});
+      }
+      tab = type; closeModal(); render();
+    }catch(e){ console.error(e); $("#fErr").textContent="Não foi possível salvar. Verifique a conexão."; }
+  };
+  if(!isNew) $("#fDel").onclick = async () => {
+    if(!confirm(`Excluir “${it.name}”?`)) return;
+    await deleteDoc(doc(db,"lists",listId,"items",it.id)); closeModal();
+  };
+}
+
+function openLists(firstTime){
+  const l = curList();
+  const rows = lists.map(x=>`
+    <button class="listrow ${x.id===listId?"on":""}" data-id="${x.id}">
+      <span><b>${esc(x.name)}</b><br><small>${x.members.length} ${x.members.length===1?"pessoa":"pessoas"}</small></span>
+      <span>${x.id===listId?"✓":""}</span>
+    </button>`).join("");
+  showSheet(`
+    <h2>${firstTime && !lists.length ? "Comece por aqui" : "Suas listas"}</h2>
+    ${rows}
+    ${l ? `
+      <div class="sep"></div>
+      <h2>Compartilhar “${esc(l.name)}”</h2>
+      <p class="who">Envie o código abaixo. Quem entrar com ele passa a ver e editar esta lista.</p>
+      <div class="code">${esc(l.code)}</div>
+      <button class="btn accent" id="shWa">Enviar pelo WhatsApp</button>
+      <button class="btn ghost" id="shCopy">Copiar link</button>
+      <div class="sep"></div>` : ""}
+    <h2>Entrar com código</h2>
+    <label class="field"><span>Código da lista</span><input id="jCode" maxlength="6" autocapitalize="characters" placeholder="Ex.: K7M2QX"></label>
+    <button class="btn" id="jGo">Entrar na lista</button>
+    <div class="sep"></div>
+    <h2>Nova lista</h2>
+    <label class="field"><span>Nome da lista</span><input id="nName" placeholder="Ex.: Nossas marcas"></label>
+    <button class="btn" id="nGo">Criar lista</button>
+    <div class="sep"></div>
+    <p class="who">Conectado como ${esc(user.displayName||"")} (${esc(user.email||"")})</p>
+    ${l?`<button class="btn ghost" id="lvList">Sair desta lista</button>`:""}
+    <button class="btn ghost" id="lOut">Sair da conta</button>`);
+  $("#modal").querySelectorAll(".listrow").forEach(b=>b.onclick=()=>selectList(b.dataset.id));
+  const link = l ? `${location.origin}${location.pathname}?codigo=${l.code}` : "";
+  if(l){
+    $("#shWa").onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(`Entra na nossa lista “${l.name}”: ${link}\nCódigo: ${l.code}`)}`,"_blank");
+    $("#shCopy").onclick = async () => { try{await navigator.clipboard.writeText(link);toast("Link copiado")}catch{toast("Código: "+l.code)} };
+    $("#lvList").onclick = leaveList;
+  }
+  $("#jGo").onclick = () => joinByCode($("#jCode").value);
+  $("#nGo").onclick = async () => { await createList($("#nName").value); closeModal(); };
+  $("#lOut").onclick = () => { closeModal(); signOut(auth); };
+}
+</script>
+</body>
+</html>
