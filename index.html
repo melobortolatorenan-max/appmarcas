@@ -6,6 +6,10 @@
 <meta name="theme-color" content="#2B1A2E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Marcas">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Marcas Boas e Ruins</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,7 +61,9 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* tela inicial */
 .home{max-width:520px;margin:0 auto;padding:28px 20px}
-.homeTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:28px}
+.homeTop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:9rem}
+.who2{display:flex;align-items:center;gap:12px;min-width:0}
+.icons{display:flex;gap:8px;flex:none}
 .homeTop small{color:var(--muted);font-size:.95rem}
 .homeTop h1{font-size:2rem;line-height:1.1;font-weight:800;word-break:break-word}
 .bigs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -118,12 +124,34 @@ main{padding:8px 16px;max-width:620px;margin:0 auto}
 .chk input{width:22px;height:22px;accent-color:var(--good);flex:none}
 .sep{height:1px;background:var(--line);margin:20px 0}
 .who{color:var(--muted);font-size:.85rem;margin:0 0 10px;word-break:break-word}
+
+.av{border-radius:50%;background:var(--plum) center/cover no-repeat;color:#fff;display:grid;place-items:center;font-weight:800;font-family:'Bricolage Grotesque',sans-serif;flex:none;overflow:hidden}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 16px}
+.btnrow .newbtn{margin:0;padding:14px 8px;font-size:.85rem}
+.newbtn.gray{margin:0 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 14px}
+.chip{padding:7px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-size:.85rem}
+.chip.on{background:var(--plum);color:#fff;border-color:var(--plum)}
+.catsel{display:flex;gap:8px;align-items:stretch}
+.catsel select{flex:1;min-width:0;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface)}
+.catsel .iconbtn{height:auto;width:50px;color:var(--good)}
+.tag{display:inline-block;font-size:.72rem;font-weight:800;text-transform:uppercase;padding:2px 8px;border-radius:99px;color:#fff;margin-bottom:4px}
+.tag.good{background:var(--good);color:var(--on)}.tag.bad{background:var(--bad);color:var(--on)}
+.item.good{border-left-color:var(--good)}.item.bad{border-left-color:var(--bad)}
+.profile{display:flex;align-items:center;gap:14px}
+.profile .grow{flex:1;min-width:0}
+.stage{position:relative;width:280px;height:280px;margin:0 auto 14px;overflow:hidden;background:#000;touch-action:none;border-radius:12px}
+.stage img{position:absolute;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.ring{position:absolute;left:20px;top:20px;width:240px;height:240px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 400px rgba(0,0,0,.55);pointer-events:none}
+.zoom{width:100%;margin-bottom:14px}
+.mem{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.mem .grow{flex:1;min-width:0}.mem small{color:var(--muted);display:block}
+.formwrap{padding-top:16px}
 .toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem;max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
 
-<!-- ============ LOGIN ============ -->
 <section id="auth" class="hidden">
   <h1>Marcas boas<br>e ruins</h1>
   <p>As listas do casal, num lugar só. Entre para ver e editar junto.</p>
@@ -136,9 +164,7 @@ main{padding:8px 16px;max-width:620px;margin:0 auto}
   <button class="link" id="aSwitch">Ainda não tenho conta</button>
 </section>
 
-<!-- ============ APP ============ -->
 <div id="app" class="hidden"><div id="view"></div></div>
-
 <div id="modal"></div>
 <div id="toast" class="toast hidden"></div>
 
@@ -147,9 +173,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   GoogleAuthProvider, signInWithPopup, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot,
-  query, where, serverTimestamp, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  query, where, serverTimestamp, arrayUnion, arrayRemove, writeBatch, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ====== CONFIGURAÇÃO DO PROJETO FIREBASE ====== */
 const firebaseConfig = {
   apiKey: "AIzaSyB4CUawMDCq8hMBdSjQSuGxzqciZz8Lb2k",
   authDomain: "marcas-boas-ruins.firebaseapp.com",
@@ -159,19 +184,20 @@ const firebaseConfig = {
   appId: "1:569774940333:web:ed69c9a65ca067ecea2624",
   measurementId: "G-4M75M1LEWY"
 };
-/* =============================================================== */
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 const DEFAULT_CATS = ["Vinho","Cerveja","Refrigerante","Suco","Congelado","Sushi","Lanches","Comida","Diversos","Cápsulas de café"];
+const DEFAULT_PLACES = ["Supermercado","Mercado","Atacadão","Adega","Padaria","Loja online","Feira"];
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const norm = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const byName = (a,b) => a.name.localeCompare(b.name);
 const catOf = i => i.category || "Sem categoria";
 const brl = n => Number(n).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const typeName = t => t==="good" ? "Marcas boas" : "Marcas ruins";
 function parsePrice(s){
   s = String(s||"").trim().replace(/[R$\s]/g,"");
   if(!s) return null;
@@ -179,11 +205,17 @@ function parsePrice(s){
   const n = parseFloat(s);
   return Number.isFinite(n) && n >= 0 ? n : NaN;
 }
+const ls = {
+  get(k){ try{ return localStorage.getItem(k) }catch{ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v) }catch{} }
+};
 
 let user = null, lists = [], listId = null, items = [];
 let view = "home", curType = "good", curCat = null, q = "", depth = 0;
 let unsubLists = null, unsubItems = null, watchedId = null;
-let signup = false;
+let signup = false, formCtx = null, profDraft = null;
+const myDeleted = new Set();
+const synced = new Set();
 
 const SV = (inner, extra="") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${inner}</svg>`;
 const THUMB = '<path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zM7 11l4-8a2.5 2.5 0 0 1 2.5 2.5V9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/>';
@@ -195,8 +227,13 @@ const ICON_ADD = SV('<circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>'
 const ICON_EDIT = SV('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>');
 const ICON_TRASH = SV('<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/>');
 const ICON_SHARE = SV('<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>');
+const ICON_SEARCH = SV('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>');
+const ICON_USERS = SV('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>');
+const ICON_BELL = SV('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>');
+const ICON_DL = SV('<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>');
+const ICON_X = SV('<path d="M18 6L6 18M6 6l12 12"/>');
 
-function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.remove("hidden");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("hidden"),2600)}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.remove("hidden");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("hidden"),2800)}
 const myName = () => user?.displayName || (user?.email||"").split("@")[0] || "";
 const curList = () => lists.find(l=>l.id===listId);
 function allowedCats(){
@@ -208,6 +245,118 @@ function allowedCats(){
 function visible(){
   const a = allowedCats();
   return a ? items.filter(i=>a.includes(catOf(i))) : items;
+}
+function catsFor(type, withDefaults){
+  const l = curList(), a = allowedCats();
+  const set = new Set(visible().filter(i=>i.type===type).map(catOf));
+  (l?.cats||[]).forEach(s=>{
+    const k = s.indexOf(":"); if(k<0) return;
+    const t = s.slice(0,k), n = s.slice(k+1);
+    if(t===type && (!a || a.includes(n))) set.add(n);
+  });
+  if(withDefaults && !a) DEFAULT_CATS.forEach(c=>set.add(c));
+  return [...set].sort((x,y)=>x.localeCompare(y));
+}
+
+/* ---------- foto e perfil ---------- */
+function myPhoto(){
+  const v = ls.get("marcas:photo:"+user.uid);
+  if(v!==null) return v || null;
+  for(const l of lists){ const p = l.memberInfo?.[user.uid]?.photo; if(p) return p; }
+  return null;
+}
+function avatar(photo,name,size){
+  const ini = esc((name||"?").trim().charAt(0).toUpperCase());
+  return `<div class="av" style="width:${size}px;height:${size}px;font-size:${Math.round(size*.42)}px;${photo?`background-image:url('${photo}')`:""}">${photo?"":ini}</div>`;
+}
+function syncMyInfo(){
+  if(!user) return;
+  const info = {name:myName(), photo:myPhoto()};
+  lists.forEach(l=>{
+    const m = l.memberInfo?.[user.uid];
+    if(m && m.name===info.name && (m.photo||null)===info.photo) return;
+    const key = l.id+"|"+info.name+"|"+(info.photo||"").length;
+    if(synced.has(key)) return; synced.add(key);
+    updateDoc(doc(db,"lists",l.id),{[`memberInfo.${user.uid}`]:info}).catch(e=>console.error(e));
+  });
+}
+function openProfile(){
+  const photo = myPhoto();
+  showSheet(`
+    <h2>Editar perfil</h2>
+    <div style="display:flex;justify-content:center;margin-bottom:14px">${avatar(photo,myName(),96)}</div>
+    <input type="file" accept="image/*" id="pFile" class="hidden">
+    <button class="btn ghost" id="pPick">Escolher foto da galeria</button>
+    ${photo?`<button class="btn ghost" id="pRem">Remover foto</button>`:""}
+    <label class="field" style="margin-top:16px"><span>Seu nome</span><input id="pName" value="${esc(profDraft ?? myName())}" autocomplete="name"></label>
+    <div class="err" id="pErr"></div>
+    <button class="btn accent" id="pSave">Salvar</button>`);
+  $("#pPick").onclick = () => $("#pFile").click();
+  $("#pFile").onchange = e => { const f = e.target.files[0]; if(f){ profDraft = $("#pName").value; openCropper(f); } };
+  if(photo) $("#pRem").onclick = () => { ls.set("marcas:photo:"+user.uid,""); profDraft=null; syncMyInfo(); closeModal(); shell(); };
+  $("#pSave").onclick = async () => {
+    const n = $("#pName").value.trim();
+    if(!n){ $("#pErr").textContent="Digite um nome."; return; }
+    try{
+      if(n!==myName()) await updateProfile(auth.currentUser,{displayName:n});
+      profDraft=null; syncMyInfo(); closeModal(); shell(); toast("Perfil salvo");
+    }catch(e){ console.error(e); $("#pErr").textContent="Não foi possível salvar."; }
+  };
+}
+function openCropper(file){
+  const url = URL.createObjectURL(file), im = new Image();
+  im.onerror = () => { toast("Não foi possível abrir essa imagem"); openProfile(); };
+  im.onload = () => {
+    const S=280, D=240, w=im.naturalWidth, h=im.naturalHeight;
+    const min = D/Math.min(w,h), max = min*4;
+    let s=min, cx=S/2, cy=S/2;
+    showSheet(`
+      <h2>Ajustar foto</h2>
+      <p class="who">Arraste e use o zoom. O que estiver dentro do círculo é o que vai aparecer.</p>
+      <div class="stage" id="stage"><img id="cImg" src="${url}" alt=""><div class="ring"></div></div>
+      <input class="zoom" id="zoom" type="range" min="0" max="100" value="0" aria-label="Zoom">
+      <button class="btn accent" id="cSave">Usar esta foto</button>
+      <button class="btn ghost" id="cBack">Voltar</button>`);
+    const img = $("#cImg"), stage = $("#stage"), zoom = $("#zoom");
+    const clampAll = () => {
+      s = Math.min(max,Math.max(min,s));
+      const mx = Math.max(0,(w*s-D)/2), my = Math.max(0,(h*s-D)/2);
+      cx = Math.min(S/2+mx,Math.max(S/2-mx,cx)); cy = Math.min(S/2+my,Math.max(S/2-my,cy));
+    };
+    const draw = () => {
+      clampAll();
+      img.style.width = w*s+"px"; img.style.height = h*s+"px";
+      img.style.left = (cx-w*s/2)+"px"; img.style.top = (cy-h*s/2)+"px";
+      zoom.value = Math.round((s/min-1)/3*100);
+    };
+    draw();
+    zoom.oninput = () => { s = min*(1+zoom.value/100*3); draw(); };
+    const ptrs = new Map();
+    stage.onpointerdown = e => { stage.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); };
+    stage.onpointermove = e => {
+      const p = ptrs.get(e.pointerId); if(!p) return;
+      if(ptrs.size===1){ cx += e.clientX-p.x; cy += e.clientY-p.y; }
+      else if(ptrs.size===2){
+        const o = [...ptrs.entries()].find(([id])=>id!==e.pointerId)[1];
+        const d0 = Math.hypot(p.x-o.x,p.y-o.y), d1 = Math.hypot(e.clientX-o.x,e.clientY-o.y);
+        if(d0>0) s *= d1/d0;
+      }
+      p.x=e.clientX; p.y=e.clientY; draw();
+    };
+    stage.onpointerup = stage.onpointercancel = e => ptrs.delete(e.pointerId);
+    stage.onwheel = e => { e.preventDefault(); s *= e.deltaY<0 ? 1.06 : .94; draw(); };
+    $("#cBack").onclick = () => { URL.revokeObjectURL(url); openProfile(); };
+    $("#cSave").onclick = () => {
+      const c = document.createElement("canvas"); c.width=c.height=192;
+      const g = c.getContext("2d");
+      const left = cx-w*s/2, top = cy-h*s/2;
+      g.drawImage(im,((S-D)/2-left)/s,((S-D)/2-top)/s,D/s,D/s,0,0,192,192);
+      ls.set("marcas:photo:"+user.uid,c.toDataURL("image/jpeg",.85));
+      URL.revokeObjectURL(url); syncMyInfo(); toast("Foto atualizada");
+      openProfile(); shell();
+    };
+  };
+  im.src = url;
 }
 
 /* ---------- AUTH ---------- */
@@ -230,7 +379,6 @@ function authErr(e){
     "auth/operation-not-allowed":"Esse tipo de login não está ativado no Firebase (Authentication > Método de login).",
     "auth/unauthorized-domain":"Domínio não autorizado. Adicione o domínio da Vercel em Authentication > Configurações > Domínios autorizados.",
     "auth/invalid-api-key":"Chave do Firebase inválida. Confira o firebaseConfig no index.html.",
-    "auth/api-key-not-valid.-please-pass-a-valid-api-key.":"Chave do Firebase inválida. Confira o firebaseConfig no index.html.",
     "auth/network-request-failed":"Sem conexão com o Firebase. Verifique a internet."
   };
   console.error(e);
@@ -279,6 +427,7 @@ function goBack(parent){
   if(depth>0) history.back();
   else { view=parent; curCat=null; q=""; shell(); }
 }
+function toHome(){ if(view==="home"){ closeModal(); shell(); } else go("home"); }
 window.addEventListener("popstate", e => {
   const s = e.state;
   if(s){ view=s.view; curType=s.curType||curType; curCat=s.curCat||null; depth=s.d||0; }
@@ -293,25 +442,28 @@ function startLists(){
     lists = snap.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>a.name.localeCompare(b.name));
     if(!lists.length){
       listId=null; items=[]; unsubItems?.(); watchedId=null; refresh();
-      if(!startLists.asked){ startLists.asked=true; go("settings"); toast("Crie sua primeira lista"); }
+      if(!startLists.asked){ startLists.asked=true; openAddList(); }
       return;
     }
-    const saved = localStorage.getItem("marcas:list");
+    const saved = ls.get("marcas:list");
     if(!lists.find(l=>l.id===listId)) listId = lists.find(l=>l.id===saved)?.id || lists[0].id;
-    watchItems(); refresh();
+    watchItems(); syncMyInfo(); refresh();
   }, e => console.error(e));
 }
 function watchItems(){
   if(!listId) return;
   if(watchedId===listId && unsubItems) return;
   unsubItems?.(); watchedId=listId;
+  let first = true;
   unsubItems = onSnapshot(collection(db,"lists",listId,"items"), snap => {
     items = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(!first) notifyChanges(snap.docChanges());
+    first = false;
     refresh();
   });
 }
 function selectList(id){
-  listId=id; localStorage.setItem("marcas:list",id); watchedId=null; items=[]; watchItems(); refresh();
+  listId=id; ls.set("marcas:list",id); watchedId=null; items=[]; watchItems(); refresh();
 }
 function genCode(){
   const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s="";
@@ -322,9 +474,10 @@ async function createList(name){
   name = name.trim(); if(!name) return false;
   try{
     const code = genCode();
-    const ref = await addDoc(collection(db,"lists"),{name,ownerId:user.uid,members:[user.uid],code,createdAt:serverTimestamp()});
+    const ref = await addDoc(collection(db,"lists"),{name,ownerId:user.uid,members:[user.uid],code,cats:[],
+      memberInfo:{[user.uid]:{name:myName(),photo:myPhoto()}},createdAt:serverTimestamp()});
     await setDoc(doc(db,"invites",code),{listId:ref.id,categories:null,createdBy:user.uid});
-    localStorage.setItem("marcas:list",ref.id); listId=ref.id;
+    ls.set("marcas:list",ref.id); listId=ref.id;
     toast("Lista criada"); return true;
   }catch(e){ console.error(e); toast("Não foi possível criar a lista"); return false; }
 }
@@ -337,21 +490,74 @@ async function joinByCode(code){
     const ex = lists.find(l=>l.id===id);
     const cur = ex?.access?.[user.uid];
     if(ex && (ex.ownerId===user.uid || !cur || cur==="all")){
-      selectList(id); toast("Você já está nessa lista"); go("home"); return true;
+      selectList(id); toast("Você já está nessa lista"); toHome(); return true;
     }
     let acc = Array.isArray(categories) ? categories : "all";
     if(ex && Array.isArray(cur) && Array.isArray(acc)) acc = [...new Set([...cur,...acc])];
-    await updateDoc(doc(db,"lists",id),{members:arrayUnion(user.uid),[`access.${user.uid}`]:acc});
-    localStorage.setItem("marcas:list",id); listId=id; watchedId=null;
-    toast("Você entrou na lista"); go("home"); return true;
+    await updateDoc(doc(db,"lists",id),{members:arrayUnion(user.uid),[`access.${user.uid}`]:acc,
+      [`memberInfo.${user.uid}`]:{name:myName(),photo:myPhoto()}});
+    ls.set("marcas:list",id); listId=id; watchedId=null;
+    toast("Você entrou na lista"); toHome(); return true;
   }catch(e){ console.error(e); toast("Não foi possível entrar na lista"); return false; }
 }
-async function leaveList(){
-  if(!confirm("Sair desta lista? Você deixa de vê-la, mas as outras pessoas continuam com ela.")) return;
-  const id = listId; listId=null;
-  try{ await updateDoc(doc(db,"lists",id),{members:arrayRemove(user.uid)}); go("home"); }
-  catch(e){ console.error(e); listId=id; toast("Não foi possível sair da lista"); }
+function openAddList(){
+  showSheet(`
+    <h2>Adicionar lista</h2>
+    <h3 style="font-size:1rem;margin:0 0 8px">Criar nova lista</h3>
+    <label class="field"><span>Nome da lista</span><input id="nName" placeholder="Ex.: Nossas marcas"></label>
+    <button class="btn accent" id="nGo">Criar lista</button>
+    <div class="sep"></div>
+    <h3 style="font-size:1rem;margin:0 0 8px">Entrar com código</h3>
+    <label class="field"><span>Código recebido</span><input id="jCode" maxlength="6" autocapitalize="characters" placeholder="Ex.: K7M2QX"></label>
+    <button class="btn" id="jGo">Entrar na lista</button>`);
+  $("#nGo").onclick = async () => { if(await createList($("#nName").value)) toHome(); };
+  $("#jGo").onclick = () => joinByCode($("#jCode").value);
 }
+async function removeMember(l,uid,name){
+  if(l.ownerId!==user.uid) return;
+  if(!confirm(`Remover ${name} da lista “${l.name}”?`)) return;
+  try{
+    await updateDoc(doc(db,"lists",l.id),{members:arrayRemove(uid),[`access.${uid}`]:deleteField(),[`memberInfo.${uid}`]:deleteField()});
+    toast("Pessoa removida");
+  }catch(e){ console.error(e); toast("Não foi possível remover"); }
+}
+
+/* ---------- NOTIFICAÇÕES ---------- */
+function notifSupported(){ return "Notification" in window; }
+function sendNotif(title,body,tag){
+  if(!document.hidden){ toast(body); return; }
+  if(!notifSupported() || Notification.permission!=="granted") return;
+  const opts = {body,icon:"icon-192.png",badge:"icon-192.png",tag};
+  if(navigator.serviceWorker?.ready) navigator.serviceWorker.ready.then(r=>r.showNotification(title,opts)).catch(()=>{ try{ new Notification(title,opts) }catch{} });
+  else { try{ new Notification(title,opts) }catch{} }
+}
+function notifyChanges(changes){
+  const a = allowedCats(), msgs = [];
+  changes.forEach(ch=>{
+    if(ch.type==="modified") return;
+    const d = ch.doc.data();
+    if(a && !a.includes(catOf(d))) return;
+    const where = `${typeName(d.type)} › ${catOf(d)}`;
+    if(ch.type==="added"){
+      if(ch.doc.metadata.hasPendingWrites || d.addedBy===user.uid) return;
+      msgs.push(`${d.addedByName||"Alguém"} adicionou “${d.name}” em ${where}`);
+    } else if(ch.type==="removed"){
+      if(myDeleted.has(ch.doc.id)){ myDeleted.delete(ch.doc.id); return; }
+      msgs.push(`“${d.name}” foi removido de ${where}`);
+    }
+  });
+  if(!msgs.length) return;
+  const l = curList();
+  if(msgs.length>3) sendNotif("Marcas boas e ruins",`${msgs.length} alterações na lista “${l?.name||""}”`,"multi");
+  else msgs.forEach((m,i)=>sendNotif("Marcas boas e ruins",m,"chg"+Date.now()+i));
+}
+
+/* ---------- INSTALAR ---------- */
+let deferredPrompt = null;
+const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt=e; if(view==="settings") renderExtras(); });
+window.addEventListener("appinstalled", () => { deferredPrompt=null; toast("App instalado"); if(view==="settings") renderExtras(); });
+if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(e=>console.error(e)));
 
 /* ---------- TELAS ---------- */
 function refresh(){
@@ -359,13 +565,20 @@ function refresh(){
   if(view==="home") drawHome();
   else if(view==="cats") renderCats();
   else if(view==="items") renderItems();
-  else if(view==="settings") renderListsBlock();
+  else if(view==="search") renderSearch();
+  else if(view==="shares") renderShares();
+  else if(view==="settings"){ renderListsBlock(); }
 }
 function shell(){
-  document.body.classList.toggle("bad",(view==="cats"||view==="items") && curType==="bad");
+  const t = view==="form" ? formCtx?.type : curType;
+  document.body.classList.toggle("bad",(view==="cats"||view==="items"||view==="form") && t==="bad");
+  if(view==="form" && !formCtx) view="home";
   if(view==="home") drawHome();
   else if(view==="cats") drawCats();
   else if(view==="items") drawItems();
+  else if(view==="search") drawSearch();
+  else if(view==="shares") drawShares();
+  else if(view==="form") drawForm();
   else drawSettings();
 }
 
@@ -374,50 +587,104 @@ function drawHome(){
   $("#view").innerHTML = `
     <div class="home">
       <div class="homeTop">
-        <div><small>Olá,</small><h1>${esc(myName())}</h1></div>
-        <button class="iconbtn dark" id="gear" aria-label="Configurações">${ICON_GEAR}</button>
+        <div class="who2">${avatar(myPhoto(),myName(),56)}<div style="min-width:0"><small>Olá,</small><h1>${esc(myName())}</h1></div></div>
+        <div class="icons">
+          <button class="iconbtn dark" id="srch" aria-label="Pesquisar">${ICON_SEARCH}</button>
+          <button class="iconbtn dark" id="gear" aria-label="Configurações">${ICON_GEAR}</button>
+        </div>
       </div>
-      ${l ? "" : `<div class="card"><b>Você ainda não tem uma lista</b><p class="who">Toque na engrenagem para criar uma ou entrar com um código.</p></div>`}
+      ${l ? "" : `<div class="card"><b>Você ainda não tem uma lista</b><p class="who">Toque em “Adicionar lista” para criar uma ou entrar com um código.</p></div>`}
       <button class="newbtn gray" id="homeAdd">${ICON_ADD}&nbsp; ADICIONAR PRODUTO</button>
+      <button class="newbtn gray" id="homeList">${ICON_ADD}&nbsp; ADICIONAR LISTA</button>
       <div class="bigs">
         <button class="big good" id="bGood">${ICON_UP}<span>Marcas boas</span></button>
         <button class="big bad" id="bBad">${ICON_DOWN}<span>Marcas ruins</span></button>
       </div>
     </div>`;
   $("#gear").onclick = () => go("settings");
-  $("#homeAdd").onclick = () => curList() ? openItem(null,"") : go("settings");
-  $("#bGood").onclick = () => curList() ? go("cats",{type:"good"}) : go("settings");
-  $("#bBad").onclick = () => curList() ? go("cats",{type:"bad"}) : go("settings");
+  $("#srch").onclick = () => curList() ? go("search") : openAddList();
+  $("#homeAdd").onclick = () => curList() ? openForm(null,"") : openAddList();
+  $("#homeList").onclick = openAddList;
+  $("#bGood").onclick = () => curList() ? go("cats",{type:"good"}) : openAddList();
+  $("#bBad").onclick = () => curList() ? go("cats",{type:"bad"}) : openAddList();
+}
+
+function drawSearch(){
+  $("#view").innerHTML = `
+    <header class="bar">
+      <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
+      <h2>Pesquisar</h2>
+    </header>
+    <div class="tools"><input class="search" id="search" type="search" placeholder="Nome do produto ou marca" autocomplete="off"></div>
+    <main><div id="content"></div></main>`;
+  $("#back").onclick = () => goBack("home");
+  $("#search").oninput = e => { q=e.target.value; renderSearch(); };
+  setTimeout(()=>$("#search")?.focus(),80);
+  renderSearch();
+}
+function renderSearch(){
+  const el = $("#content"); if(!el) return;
+  const nq = norm(q).trim();
+  if(!nq){ el.innerHTML = `<div class="empty"><b>Digite para pesquisar</b>Veja se um produto está em Marcas boas ou Marcas ruins.</div>`; return; }
+  const hits = visible().filter(i=>norm(i.name).includes(nq)||norm(i.note).includes(nq)||norm(i.place).includes(nq)).sort(byName);
+  el.innerHTML = hits.length ? hits.map(i=>itemHtml(i,true,true)).join("") : `<div class="empty"><b>Não consta na lista</b>“${esc(q)}” não está em Marcas boas nem em Marcas ruins.</div>`;
+  bindItems(el);
 }
 
 function drawCats(){
   $("#view").innerHTML = `
     <header class="bar">
       <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
-      <h2>${curType==="good"?"Marcas boas":"Marcas ruins"}</h2>
+      <h2>${typeName(curType)}</h2>
     </header>
     <div class="tools"><input class="search" id="search" type="search" placeholder="Buscar produto ou categoria"></div>
-    <main><button class="newbtn" id="newP">+ NOVO PRODUTO</button><div id="content"></div></main>`;
+    <main>
+      <div class="btnrow">
+        <button class="newbtn" id="newP">${ICON_ADD}&nbsp;PRODUTO</button>
+        <button class="newbtn gray" id="newC">${ICON_ADD}&nbsp;CATEGORIA</button>
+      </div>
+      <div id="content"></div>
+    </main>`;
   $("#back").onclick = () => goBack("home");
   $("#search").oninput = e => { q=e.target.value; renderCats(); };
-  $("#newP").onclick = () => openItem(null,"");
+  $("#newP").onclick = () => openForm(null,"");
+  $("#newC").onclick = async () => { await addCategory(curType); };
   renderCats();
 }
-function bindItems(el){
-  el.querySelectorAll(".item").forEach(b=>b.onclick=()=>openItem(items.find(i=>i.id===b.dataset.id)));
+async function ensureAccess(cat){
+  const a = allowedCats();
+  if(a && cat && !a.includes(cat)){
+    try{ await updateDoc(doc(db,"lists",listId),{[`access.${user.uid}`]:arrayUnion(cat)}); }catch(e){ console.error(e); }
+  }
 }
-const itemHtml = (i,showCat) => `
-  <button class="item" data-id="${i.id}">
+async function addCategory(type){
+  const n = (prompt("Nome da nova categoria:")||"").trim();
+  if(!n) return null;
+  const existing = catsFor(type,false).find(c=>norm(c)===norm(n));
+  if(existing){ toast("Essa categoria já existe"); return existing; }
+  try{
+    await updateDoc(doc(db,"lists",listId),{cats:arrayUnion(`${type}:${n}`)});
+    await ensureAccess(n);
+    toast("Categoria criada"); return n;
+  }catch(e){ console.error(e); toast("Não foi possível criar a categoria"); return null; }
+}
+function bindItems(el){
+  el.querySelectorAll(".item").forEach(b=>b.onclick=()=>openForm(items.find(i=>i.id===b.dataset.id)));
+}
+const itemHtml = (i,showCat,showTag) => `
+  <button class="item ${showTag?i.type:""}" data-id="${i.id}">
+    ${showTag?`<span class="tag ${i.type}">${i.type==="good"?"Marca boa":"Marca ruim"}</span>`:""}
     <b>${esc(i.name)}</b>
     ${showCat?`<div class="note">${esc(catOf(i))}</div>`:""}
     ${i.note?`<div class="note">${esc(i.note)}</div>`:""}
+    ${i.place?`<div class="note">Local: ${esc(i.place)}</div>`:""}
     ${i.price!=null?`<div class="price">Pago: ${brl(i.price)}</div>`:""}
     <div class="by">${esc(i.addedByName||"")}</div>
   </button>`;
 
 function renderCats(){
   const el = $("#content"); if(!el) return;
-  if(!curList()){ el.innerHTML = `<div class="empty"><b>Você ainda não tem uma lista</b>Abra as configurações para criar uma.</div>`; return; }
+  if(!curList()){ el.innerHTML = `<div class="empty"><b>Você ainda não tem uma lista</b>Volte e toque em “Adicionar lista”.</div>`; return; }
   const mine = visible().filter(i=>i.type===curType);
   const nq = norm(q);
   if(nq){
@@ -425,15 +692,15 @@ function renderCats(){
     el.innerHTML = hits.length ? hits.map(i=>itemHtml(i,true)).join("") : `<div class="empty"><b>Nada encontrado</b>Tente outra busca.</div>`;
     bindItems(el); return;
   }
-  if(!mine.length){
-    el.innerHTML = `<div class="empty"><b>${curType==="good"?"Nenhuma marca boa ainda":"Nenhuma marca ruim ainda"}</b>Toque em “Novo produto” para adicionar o primeiro.</div>`;
+  const cats = catsFor(curType,false);
+  if(!cats.length){
+    el.innerHTML = `<div class="empty"><b>${curType==="good"?"Nenhuma marca boa ainda":"Nenhuma marca ruim ainda"}</b>Toque em “Produto” ou “Categoria” para começar.</div>`;
     return;
   }
-  const groups = {};
-  mine.forEach(i=>{(groups[catOf(i)] ||= []).push(i)});
-  el.innerHTML = Object.keys(groups).sort((a,b)=>a.localeCompare(b)).map(c=>`
+  const count = c => mine.filter(i=>catOf(i)===c).length;
+  el.innerHTML = cats.map(c=>`
     <div class="catcard" data-c="${esc(c)}" role="button" tabindex="0">
-      <div class="catinfo"><b>${esc(c)}</b><span>${groups[c].length} ${groups[c].length===1?"produto":"produtos"}</span></div>
+      <div class="catinfo"><b>${esc(c)}</b><span>${count(c)} ${count(c)===1?"produto":"produtos"}</span></div>
       <button class="ic add" data-act="add" aria-label="Adicionar produto em ${esc(c)}">${ICON_ADD}</button>
       <button class="ic edit" data-act="edit" aria-label="Renomear categoria">${ICON_EDIT}</button>
       <button class="ic del" data-act="del" aria-label="Excluir categoria">${ICON_TRASH}</button>
@@ -443,7 +710,7 @@ function renderCats(){
     card.onclick = () => go("items",{cat:c});
     card.querySelectorAll(".ic").forEach(b=>b.onclick = e => {
       e.stopPropagation();
-      if(b.dataset.act==="add") openItem(null,c);
+      if(b.dataset.act==="add") openForm(null,c);
       else if(b.dataset.act==="edit") renameCat(c);
       else deleteCat(c);
     });
@@ -456,9 +723,9 @@ function drawItems(){
       <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
       <h2>${esc(curCat||"")}</h2>
     </header>
-    <main><button class="newbtn" id="newP">+ NOVO PRODUTO</button><div id="content"></div></main>`;
+    <main><button class="newbtn" id="newP">${ICON_ADD}&nbsp;NOVO PRODUTO</button><div id="content"></div></main>`;
   $("#back").onclick = () => goBack("cats");
-  $("#newP").onclick = () => openItem(null,curCat);
+  $("#newP").onclick = () => openForm(null,curCat);
   renderItems();
 }
 function renderItems(){
@@ -471,59 +738,177 @@ function renderItems(){
 async function renameCat(c){
   const n = (prompt("Novo nome da categoria:",c)||"").trim();
   if(!n || n===c) return;
+  const l = curList();
   try{
     const b = writeBatch(db);
     items.filter(i=>i.type===curType && catOf(i)===c).forEach(i=>b.update(doc(db,"lists",listId,"items",i.id),{category:n}));
+    const upd = {cats:[...new Set([...(l.cats||[]).filter(x=>x!==`${curType}:${c}`),`${curType}:${n}`])]};
+    if(l.ownerId===user.uid && l.access){
+      const acc = {}; Object.entries(l.access).forEach(([u,v])=>{ acc[u] = Array.isArray(v) ? v.map(x=>x===c?n:x) : v; });
+      upd.access = acc;
+    }
+    b.update(doc(db,"lists",listId),upd);
     await b.commit(); toast("Categoria renomeada");
   }catch(e){ console.error(e); toast("Não foi possível renomear"); }
 }
 async function deleteCat(c){
   const mine = items.filter(i=>i.type===curType && catOf(i)===c);
   if(!confirm(`Excluir a categoria “${c}” e os ${mine.length} produto(s) dela?`)) return;
+  const l = curList();
   try{
     const b = writeBatch(db);
-    mine.forEach(i=>b.delete(doc(db,"lists",listId,"items",i.id)));
+    mine.forEach(i=>{ myDeleted.add(i.id); b.delete(doc(db,"lists",listId,"items",i.id)); });
+    b.update(doc(db,"lists",listId),{cats:(l.cats||[]).filter(x=>x!==`${curType}:${c}`)});
     await b.commit(); toast("Categoria excluída");
   }catch(e){ console.error(e); toast("Não foi possível excluir"); }
 }
 
+/* ---------- FORMULÁRIO DE PRODUTO (tela cheia) ---------- */
+function openForm(it,preset){
+  const a = allowedCats();
+  formCtx = {it, preset, type: it?.type || curType, extra:new Set(), allowed:a};
+  go("form");
+}
+function drawForm(){
+  const {it,preset} = formCtx, isNew = !it;
+  let type = formCtx.type;
+  const catVal = it ? (it.category||"") : (preset && preset!=="Sem categoria" ? preset : "");
+  const priceVal = it?.price!=null ? String(it.price).replace(".",",") : "";
+  const usedPlaces = items.map(i=>i.place).filter(Boolean);
+  const places = [...new Set([...usedPlaces,...DEFAULT_PLACES])].slice(0,10);
+  $("#view").innerHTML = `
+    <header class="bar">
+      <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
+      <h2>${isNew?"Adicionar produto":"Editar produto"}</h2>
+    </header>
+    <main class="formwrap">
+      <div class="seg">
+        <button class="g" id="tG">${ICON_UP} Boa</button>
+        <button class="b" id="tB">${ICON_DOWN} Ruim</button>
+      </div>
+      <label class="field"><span>Produto ou marca</span><input id="fName" value="${esc(it?.name||"")}" placeholder="Ex.: Vinho Balduzzi" autocomplete="off"></label>
+      <div class="field"><span>Categoria</span>
+        <div class="catsel"><select id="fCat"></select>
+        <button class="iconbtn dark" id="fNewCat" type="button" aria-label="Adicionar categoria">${ICON_ADD}</button></div>
+      </div>
+      <label class="field"><span>Local de compra (opcional)</span><input id="fPlace" value="${esc(it?.place||"")}" placeholder="Ex.: Atacadão, Adega Central" autocomplete="off"></label>
+      <div class="chips" id="chips">${places.map(p=>`<button type="button" class="chip" data-p="${esc(p)}">${esc(p)}</button>`).join("")}</div>
+      <label class="field"><span>Valor pago (opcional)</span><input id="fPrice" inputmode="decimal" value="${esc(priceVal)}" placeholder="Ex.: 12,90" autocomplete="off"></label>
+      <label class="field"><span>Observação (opcional)</span><textarea id="fNote" placeholder="Ex.: muito doce, aguado, não é dos melhores">${esc(it?.note||"")}</textarea></label>
+      <div class="err" id="fErr"></div>
+      <button class="btn accent" id="fSave">Salvar</button>
+      ${isNew?"":`<button class="btn danger" id="fDel">Excluir produto</button>`}
+    </main>`;
+  let selected = catVal;
+  const fillCats = () => {
+    const set = new Set([...catsFor(type,true),...formCtx.extra]);
+    if(selected) set.add(selected);
+    const arr = [...set].sort((x,y)=>x.localeCompare(y));
+    $("#fCat").innerHTML = `<option value="">Sem categoria</option>` + arr.map(c=>`<option value="${esc(c)}" ${c===selected?"selected":""}>${esc(c)}</option>`).join("");
+  };
+  const paint = () => {
+    formCtx.type = type;
+    document.body.classList.toggle("bad",type==="bad");
+    $("#tG").classList.toggle("on",type==="good"); $("#tB").classList.toggle("on",type==="bad");
+    $("#fSave").style.background = type==="good" ? "var(--good)" : "var(--bad)";
+    fillCats();
+  };
+  paint();
+  $("#fCat").onchange = e => { selected = e.target.value; };
+  $("#tG").onclick = () => { type="good"; paint(); };
+  $("#tB").onclick = () => { type="bad"; paint(); };
+  $("#back").onclick = () => goBack("home");
+  $("#chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ $("#fPlace").value = b.dataset.p; });
+  $("#fNewCat").onclick = async () => {
+    const n = await addCategory(type);
+    if(n){ formCtx.extra.add(n); selected = n; fillCats(); }
+  };
+  if(isNew) setTimeout(()=>$("#fName").focus(),80);
+  $("#fSave").onclick = async () => {
+    const name = $("#fName").value.trim();
+    if(!name){ $("#fErr").textContent="Digite o nome do produto."; return; }
+    const price = parsePrice($("#fPrice").value);
+    if(Number.isNaN(price)){ $("#fErr").textContent="Valor pago inválido. Use números, ex.: 12,90."; return; }
+    const data = {name, type, category:selected, place:$("#fPlace").value.trim(), note:$("#fNote").value.trim(), price};
+    try{
+      await ensureAccess(selected);
+      if(isNew){
+        await addDoc(collection(db,"lists",listId,"items"),{...data,addedBy:user.uid,addedByName:user.displayName||user.email,createdAt:serverTimestamp()});
+      } else {
+        await updateDoc(doc(db,"lists",listId,"items",it.id),{...data,editedByName:user.displayName||user.email});
+      }
+      toast("Produto salvo"); formCtx=null; goBack("home");
+    }catch(e){ console.error(e); $("#fErr").textContent="Não foi possível salvar. Verifique a conexão."; }
+  };
+  if(!isNew) $("#fDel").onclick = async () => {
+    if(!confirm(`Excluir “${it.name}”?`)) return;
+    try{ myDeleted.add(it.id); await deleteDoc(doc(db,"lists",listId,"items",it.id)); formCtx=null; goBack("home"); }
+    catch(e){ console.error(e); toast("Não foi possível excluir"); }
+  };
+}
+
 /* ---------- CONFIGURAÇÕES ---------- */
 function drawSettings(){
-  const l = curList();
   $("#view").innerHTML = `
     <header class="bar">
       <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
       <h2>Configurações</h2>
     </header>
     <main class="set">
-      <div class="card"><div class="k">Nome</div><div class="v">${esc(myName())}</div></div>
-      <div class="card"><div class="k">E-mail cadastrado</div><div class="v">${esc(user.email||"")}</div></div>
+      <div class="card profile">
+        <button id="avBtn" aria-label="Mudar foto" style="border-radius:50%">${avatar(myPhoto(),myName(),64)}</button>
+        <div class="grow"><div class="k">Nome</div><div class="v">${esc(myName())}</div>
+          <div class="k" style="margin-top:6px">E-mail cadastrado</div><div class="v" style="font-size:.9rem">${esc(user.email||"")}</div></div>
+        <button class="iconbtn dark" id="pen" aria-label="Editar perfil">${ICON_EDIT}</button>
+      </div>
       <div class="card row">
         <div><div class="v">Compartilhar categorias</div><div class="k">Escolha uma, várias ou todas</div></div>
         <button class="iconbtn dark" id="shareCats" aria-label="Compartilhar categorias">${ICON_SHARE}</button>
       </div>
+      <div class="card row">
+        <div><div class="v">Compartilhamentos</div><div class="k">Com quem e quais categorias</div></div>
+        <button class="iconbtn dark" id="shares" aria-label="Ver compartilhamentos">${ICON_USERS}</button>
+      </div>
+      <div id="extras"></div>
       <div class="sep"></div>
       <h3>Suas listas</h3>
       <div id="listsBlock"></div>
       <div class="sep"></div>
-      <h3>Entrar com código</h3>
-      <label class="field"><span>Código recebido</span><input id="jCode" maxlength="6" autocapitalize="characters" placeholder="Ex.: K7M2QX"></label>
-      <button class="btn" id="jGo">Entrar na lista</button>
-      <div class="sep"></div>
-      <h3>Nova lista</h3>
-      <label class="field"><span>Nome da lista</span><input id="nName" placeholder="Ex.: Nossas marcas"></label>
-      <button class="btn" id="nGo">Criar lista</button>
-      <div class="sep"></div>
-      ${l?`<button class="btn ghost" id="lvList">Sair desta lista</button>`:""}
       <button class="btn ghost" id="lOut">Sair da conta</button>
     </main>`;
   $("#back").onclick = () => goBack("home");
+  $("#pen").onclick = $("#avBtn").onclick = () => { profDraft=null; openProfile(); };
   $("#shareCats").onclick = openShare;
-  $("#jGo").onclick = () => joinByCode($("#jCode").value);
-  $("#nGo").onclick = async () => { if(await createList($("#nName").value)) go("home"); };
+  $("#shares").onclick = () => go("shares");
   $("#lOut").onclick = () => signOut(auth);
-  if(l) $("#lvList").onclick = leaveList;
-  renderListsBlock();
+  renderExtras(); renderListsBlock();
+}
+function renderExtras(){
+  const el = $("#extras"); if(!el) return;
+  let nState = "Não disponível neste navegador", nBtn = "";
+  if(notifSupported()){
+    const p = Notification.permission;
+    nState = p==="granted" ? "Ativadas" : p==="denied" ? "Bloqueadas nas configurações do navegador" : "Avisa quando alguém adiciona ou remove produtos";
+    nBtn = p==="default" ? `<button class="iconbtn dark" id="nBtn" aria-label="Ativar notificações">${ICON_BELL}</button>` : "";
+  }
+  const inst = isStandalone() ? "App já instalado" : "Adicionar à tela inicial do celular";
+  el.innerHTML = `
+    <div class="card row"><div><div class="v">Notificações</div><div class="k">${nState}</div></div>${nBtn}</div>
+    ${isStandalone()?"":`<div class="card row"><div><div class="v">Instalar o app</div><div class="k">${inst}</div></div><button class="iconbtn dark" id="iBtn" aria-label="Instalar">${ICON_DL}</button></div>`}`;
+  $("#nBtn")?.addEventListener("click", async () => {
+    const r = await Notification.requestPermission();
+    toast(r==="granted" ? "Notificações ativadas" : "Notificações não permitidas");
+    renderExtras();
+  });
+  $("#iBtn")?.addEventListener("click", async () => {
+    if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; renderExtras(); return; }
+    showSheet(`
+      <h2>Instalar o app</h2>
+      <p class="who"><b>Android (Chrome):</b> toque nos três pontinhos ⋮ no canto e escolha “Instalar app” ou “Adicionar à tela inicial”.</p>
+      <p class="who"><b>iPhone (Safari):</b> toque em Compartilhar e depois em “Adicionar à Tela de Início”.</p>
+      <button class="btn ghost" id="iClose">Fechar</button>`);
+    $("#iClose").onclick = closeModal;
+  });
 }
 function renderListsBlock(){
   const el = $("#listsBlock"); if(!el) return;
@@ -531,8 +916,45 @@ function renderListsBlock(){
     <button class="listrow ${x.id===listId?"on":""}" data-id="${x.id}">
       <span><b>${esc(x.name)}</b><br><small>${x.members.length} ${x.members.length===1?"pessoa":"pessoas"}</small></span>
       <span>${x.id===listId?"✓":""}</span>
-    </button>`).join("") : `<p class="who">Nenhuma lista ainda. Crie uma abaixo.</p>`;
+    </button>`).join("") : `<p class="who">Nenhuma lista ainda. Volte à tela inicial e toque em “Adicionar lista”.</p>`;
   el.querySelectorAll(".listrow").forEach(b=>b.onclick=()=>{ selectList(b.dataset.id); toast("Lista selecionada"); });
+}
+
+/* ---------- COMPARTILHAMENTOS ---------- */
+function drawShares(){
+  $("#view").innerHTML = `
+    <header class="bar">
+      <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
+      <h2>Compartilhamentos</h2>
+    </header>
+    <main class="set"><div id="content"></div></main>`;
+  $("#back").onclick = () => goBack("settings");
+  renderShares();
+}
+function renderShares(){
+  const el = $("#content"); if(!el) return;
+  if(!lists.length){ el.innerHTML = `<div class="empty"><b>Nenhuma lista ainda</b>Adicione uma lista na tela inicial.</div>`; return; }
+  el.innerHTML = lists.map(l=>{
+    const mine = l.ownerId===user.uid;
+    const ownerName = l.memberInfo?.[l.ownerId]?.name || "o dono";
+    const rows = l.members.map(uid=>{
+      const info = l.memberInfo?.[uid] || {};
+      const name = uid===user.uid ? myName() : (info.name || "Pessoa");
+      const photo = uid===user.uid ? myPhoto() : info.photo;
+      const acc = l.access?.[uid];
+      const sub = uid===l.ownerId ? "Dono da lista · todas as categorias"
+        : Array.isArray(acc) ? "Categorias: "+(acc.length?acc.join(", "):"nenhuma") : "Todas as categorias";
+      const canRemove = mine && uid!==user.uid;
+      return `<div class="mem">${avatar(photo,name,40)}<div class="grow"><b>${esc(name)}${uid===user.uid?" (você)":""}</b><small>${esc(sub)}</small></div>
+        ${canRemove?`<button class="iconbtn dark" data-rm="${l.id}|${uid}|${esc(name)}" aria-label="Remover ${esc(name)}">${ICON_X}</button>`:""}</div>`;
+    }).join("");
+    return `<div class="card"><h3>${esc(l.name)}</h3>
+      <p class="who">${mine?"Você é o dono desta lista.":"Compartilhada com você por "+esc(ownerName)+"."} ${l.members.length} ${l.members.length===1?"pessoa":"pessoas"}.</p>${rows}</div>`;
+  }).join("");
+  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{
+    const [id,uid,name] = b.dataset.rm.split("|");
+    removeMember(lists.find(x=>x.id===id),uid,name);
+  });
 }
 
 /* ---------- MODAIS ---------- */
@@ -542,66 +964,12 @@ function showSheet(html){
   $("#ov").addEventListener("click",e=>{ if(e.target.id==="ov") closeModal(); });
 }
 
-function openItem(it,presetCat){
-  const isNew = !it;
-  let type = it?.type || curType;
-  const a = allowedCats();
-  const allCats = a ? [...a].sort((x,y)=>x.localeCompare(y))
-    : [...new Set([...DEFAULT_CATS, ...items.map(i=>i.category).filter(Boolean)])].sort((x,y)=>x.localeCompare(y));
-  const catVal = it ? (it.category||"") : (presetCat && presetCat!=="Sem categoria" ? presetCat : "");
-  const priceVal = it?.price!=null ? String(it.price).replace(".",",") : "";
-  showSheet(`
-    <h2>${isNew?"Adicionar produto":"Editar produto"}</h2>
-    <div class="seg">
-      <button class="g" id="tG">${ICON_UP} Boa</button>
-      <button class="b" id="tB">${ICON_DOWN} Ruim</button>
-    </div>
-    <label class="field"><span>Produto ou marca</span><input id="fName" value="${esc(it?.name||"")}" placeholder="Ex.: Vinho Balduzzi" autocomplete="off"></label>
-    <label class="field"><span>Categoria</span><input id="fCat" list="catList" value="${esc(catVal)}" placeholder="Ex.: Vinho, Cerveja, Congelado" autocomplete="off"></label>
-    <datalist id="catList">${allCats.map(c=>`<option value="${esc(c)}">`).join("")}</datalist>
-    <label class="field"><span>Valor pago (opcional)</span><input id="fPrice" inputmode="decimal" value="${esc(priceVal)}" placeholder="Ex.: 12,90" autocomplete="off"></label>
-    <label class="field"><span>Observação (opcional)</span><textarea id="fNote" placeholder="Ex.: muito doce, aguado, não é dos melhores">${esc(it?.note||"")}</textarea></label>
-    <div class="err" id="fErr"></div>
-    <button class="btn accent" id="fSave">Salvar</button>
-    ${isNew?"":`<button class="btn danger" id="fDel">Excluir produto</button>`}
-    <button class="btn ghost" id="fCancel">Cancelar</button>`);
-  const paint = () => {
-    $("#tG").classList.toggle("on",type==="good"); $("#tB").classList.toggle("on",type==="bad");
-    $("#fSave").style.background = type==="good" ? "var(--good)" : "var(--bad)";
-  };
-  paint();
-  $("#tG").onclick = () => { type="good"; paint(); };
-  $("#tB").onclick = () => { type="bad"; paint(); };
-  $("#fCancel").onclick = closeModal;
-  if(isNew) setTimeout(()=>$("#fName").focus(),80);
-  $("#fSave").onclick = async () => {
-    const name = $("#fName").value.trim();
-    if(!name){ $("#fErr").textContent="Digite o nome do produto."; return; }
-    const price = parsePrice($("#fPrice").value);
-    if(Number.isNaN(price)){ $("#fErr").textContent="Valor pago inválido. Use números, ex.: 12,90."; return; }
-    const data = {name, type, category:$("#fCat").value.trim(), note:$("#fNote").value.trim(), price};
-    try{
-      if(isNew){
-        await addDoc(collection(db,"lists",listId,"items"),{...data,addedBy:user.uid,addedByName:user.displayName||user.email,createdAt:serverTimestamp()});
-      } else {
-        await updateDoc(doc(db,"lists",listId,"items",it.id),{...data,editedByName:user.displayName||user.email});
-      }
-      closeModal();
-      if(type!==curType){ curType=type; shell(); }
-    }catch(e){ console.error(e); $("#fErr").textContent="Não foi possível salvar. Verifique a conexão."; }
-  };
-  if(!isNew) $("#fDel").onclick = async () => {
-    if(!confirm(`Excluir “${it.name}”?`)) return;
-    try{ await deleteDoc(doc(db,"lists",listId,"items",it.id)); closeModal(); }
-    catch(e){ console.error(e); toast("Não foi possível excluir"); }
-  };
-}
-
 function openShare(){
   const l = curList();
   if(!l){ toast("Crie uma lista primeiro"); return; }
-  const cats = [...new Set(visible().map(catOf))].sort((a,b)=>a.localeCompare(b));
-  if(!cats.length){ toast("Cadastre produtos antes de compartilhar categorias"); return; }
+  if(l.ownerId!==user.uid){ toast("Só quem criou a lista pode compartilhar"); return; }
+  const cats = [...new Set([...catsFor("good",false),...catsFor("bad",false)])].sort((a,b)=>a.localeCompare(b));
+  if(!cats.length){ toast("Cadastre categorias antes de compartilhar"); return; }
   showSheet(`
     <h2>Compartilhar categorias</h2>
     <p class="who">Escolha o que a outra pessoa poderá ver e editar.</p>
