@@ -16,15 +16,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F7F5F2; --surface:#FFFFFF; --ink:#241C27; --muted:#6F6674; --line:#E6E1E8;
-  --good:#1F7A4D; --good-soft:#E3F2EA; --bad:#B3262E; --bad-soft:#FBE7E8;
-  --plum:#2B1A2E; --accent:var(--good); --accent-soft:var(--good-soft); --on:#fff;
+  --bg:#000000; --surface:#241C27; --ink:#F2EDF3; --muted:#A99FB0; --line:#3A2F3E; color-scheme:dark;
+  --good:#4FC58A; --good-soft:#17342A; --bad:#F0777E; --bad-soft:#3E1D21;
+  --plum:#120C14; --accent:var(--good); --accent-soft:var(--good-soft); --on:#120C14;
   --r:16px;
   font-family:'Figtree',system-ui,sans-serif;
-}
-@media (prefers-color-scheme:dark){
-  :root{--bg:#000000; --surface:#241C27; --ink:#F2EDF3; --muted:#A99FB0; --line:#3A2F3E;
-    --good:#4FC58A; --good-soft:#17342A; --bad:#F0777E; --bad-soft:#3E1D21; --plum:#120C14; --on:#120C14;}
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-size:16px}
@@ -62,7 +58,7 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* tela inicial */
 .home{max-width:520px;margin:0 auto;padding:28px 20px}
-.homeLogo{display:block;width:140px;max-width:45%;height:auto;border-radius:12px;margin:12px auto 0}
+.homeLogo{display:block;width:min(270px,80%);height:auto;margin:12px auto 0}
 .homeTop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4.5rem 0}
 .who2{display:flex;align-items:center;gap:12px;min-width:0}
 .icons{display:flex;gap:8px;flex:none}
@@ -79,8 +75,7 @@ input,select,textarea{font:inherit;color:inherit}
 .search{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface)}
 main{padding:8px 16px;max-width:620px;margin:0 auto}
 .newbtn svg{width:24px;height:24px}
-.newbtn.gray{background:#6F6674;color:#fff}
-@media (prefers-color-scheme:dark){.newbtn.gray{background:#4B4351}}
+.newbtn.gray{background:#4B4351;color:#fff}
 .newbtn{display:flex;align-items:center;justify-content:center;width:100%;padding:16px;border-radius:18px;background:var(--accent);color:var(--on);font-weight:800;letter-spacing:.04em;margin:8px 0 16px;box-shadow:0 6px 18px rgba(0,0,0,.16)}
 .catcard{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 12px 14px 16px;margin-bottom:12px;cursor:pointer}
 .catinfo{flex:1;min-width:0}
@@ -149,14 +144,14 @@ main{padding:8px 16px;max-width:620px;margin:0 auto}
 .mem{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
 .mem .grow{flex:1;min-width:0}.mem small{color:var(--muted);display:block}
 .formwrap{padding-top:16px}
-.logo{display:block;width:min(240px,70%);height:auto;border-radius:16px;margin:0 auto 18px}
+.logo{display:block;width:min(270px,80%);height:auto;margin:0 auto 18px}
 .toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem;max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
 
 <section id="auth" class="hidden">
-  <img class="logo" src="logo.png" alt="Marcas boas e ruins">
+  <img class="logo" src="logo-h.png" alt="Marcas boas e ruins">
   <h1 class="sr">Marcas boas e ruins</h1>
   <p>As listas do casal, num lugar só. Entre para ver e editar junto.</p>
   <label class="field" id="nameField"><span>Seu nome</span><input id="aName" autocomplete="name" placeholder="Como quer aparecer na lista"></label>
@@ -590,7 +585,7 @@ function drawHome(){
   const l = curList();
   $("#view").innerHTML = `
     <div class="home">
-      <img class="homeLogo" src="logo.png" alt="Marcas boas e ruins">
+      <img class="homeLogo" src="logo-h.png" alt="Marcas boas e ruins">
       <div class="homeTop">
         <div class="who2">${avatar(myPhoto(),myName(),56)}<div style="min-width:0"><small>Olá,</small><h1>${esc(myName())}</h1></div></div>
         <div class="icons">
