@@ -145,6 +145,12 @@ main{padding:8px 16px;max-width:620px;margin:0 auto}
 .mem .grow{flex:1;min-width:0}.mem small{color:var(--muted);display:block}
 .formwrap{padding-top:16px}
 .logo{display:block;width:min(270px,80%);height:auto;margin:0 auto 18px}
+.sRow{position:relative}
+.sRow .search{padding-right:54px}
+.mic{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:10px;display:grid;place-items:center;color:var(--ink)}
+.mic svg{width:22px;height:22px}
+.mic.on{background:var(--bad);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.5}}
 .toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem;max-width:90vw;text-align:center}
 </style>
 </head>
@@ -230,6 +236,7 @@ const ICON_SEARCH = SV('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"
 const ICON_USERS = SV('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>');
 const ICON_BELL = SV('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>');
 const ICON_DL = SV('<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>');
+const ICON_MIC = SV('<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/>');
 const ICON_X = SV('<path d="M18 6L6 18M6 6l12 12"/>');
 
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.remove("hidden");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("hidden"),2800)}
@@ -615,11 +622,29 @@ function drawSearch(){
       <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
       <h2>Pesquisar</h2>
     </header>
-    <div class="tools"><input class="search" id="search" type="search" placeholder="Nome do produto ou marca" autocomplete="off"></div>
+    <div class="tools"><div class="sRow"><input class="search" id="search" type="search" placeholder="Nome do produto ou marca" autocomplete="off"><button class="mic" id="mic" aria-label="Pesquisar por áudio">${ICON_MIC}</button></div></div>
     <main><div id="content"></div></main>`;
   $("#back").onclick = () => goBack("home");
   $("#search").oninput = e => { q=e.target.value; renderSearch(); };
   setTimeout(()=>$("#search")?.focus(),80);
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const mic = $("#mic");
+  if(!Rec) mic.classList.add("hidden");
+  else {
+    let rec = null;
+    mic.onclick = () => {
+      if(rec){ rec.stop(); return; }
+      rec = new Rec(); rec.lang = "pt-BR"; rec.interimResults = true; rec.continuous = false;
+      mic.classList.add("on");
+      rec.onresult = e => {
+        const t = [...e.results].map(r=>r[0].transcript).join(" ").trim();
+        $("#search").value = t; q = t; renderSearch();
+      };
+      rec.onerror = e => { if(e.error!=="aborted" && e.error!=="no-speech") toast(e.error==="not-allowed" ? "Permita o uso do microfone" : "Não entendi, tente de novo"); };
+      rec.onend = () => { rec = null; mic.classList.remove("on"); };
+      try{ rec.start(); }catch{ rec = null; mic.classList.remove("on"); }
+    };
+  }
   renderSearch();
 }
 function renderSearch(){
