@@ -23,7 +23,7 @@
   font-family:'Figtree',system-ui,sans-serif;
 }
 @media (prefers-color-scheme:dark){
-  :root{--bg:#171218; --surface:#241C27; --ink:#F2EDF3; --muted:#A99FB0; --line:#3A2F3E;
+  :root{--bg:#000000; --surface:#241C27; --ink:#F2EDF3; --muted:#A99FB0; --line:#3A2F3E;
     --good:#4FC58A; --good-soft:#17342A; --bad:#F0777E; --bad-soft:#3E1D21; --plum:#120C14; --on:#120C14;}
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -62,8 +62,8 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* tela inicial */
 .home{max-width:520px;margin:0 auto;padding:28px 20px}
-.homeLogo{display:block;width:min(200px,60%);height:auto;border-radius:14px;margin:0 0 18px}
-.homeTop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:9rem}
+.homeLogo{display:block;width:140px;max-width:45%;height:auto;border-radius:12px;margin:12px auto 0}
+.homeTop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4.5rem 0}
 .who2{display:flex;align-items:center;gap:12px;min-width:0}
 .icons{display:flex;gap:8px;flex:none}
 .homeTop small{color:var(--muted);font-size:.95rem}
