@@ -504,7 +504,7 @@ async function joinByCode(code){
       [`memberInfo.${user.uid}`]:{name:myName(),photo:myPhoto()}});
     ls.set("marcas:list",id); listId=id; watchedId=null;
     toast("Você entrou na lista"); toHome(); return true;
-  }catch(e){ console.error(e); toast("Não foi possível entrar na lista"); return false; }
+  }catch(e){ console.error(e); toast("Não foi possível entrar na lista"+(e.code?" ("+e.code+")":"")); return false; }
 }
 function openAddList(){
   showSheet(`
@@ -896,9 +896,6 @@ function drawSettings(){
       </div>
       <div id="extras"></div>
       <div class="sep"></div>
-      <h3>Suas listas</h3>
-      <div id="listsBlock"></div>
-      <div class="sep"></div>
       <button class="btn ghost" id="lOut">Sair da conta</button>
     </main>`;
   $("#back").onclick = () => goBack("home");
@@ -906,7 +903,7 @@ function drawSettings(){
   $("#shareCats").onclick = openShare;
   $("#shares").onclick = () => go("shares");
   $("#lOut").onclick = () => signOut(auth);
-  renderExtras(); renderListsBlock();
+  renderExtras();
 }
 function renderExtras(){
   const el = $("#extras"); if(!el) return;
@@ -996,36 +993,56 @@ function openShare(){
   const cats = [...new Set([...catsFor("good",false),...catsFor("bad",false)])].sort((a,b)=>a.localeCompare(b));
   if(!cats.length){ toast("Cadastre categorias antes de compartilhar"); return; }
   showSheet(`
-    <h2>Compartilhar categorias</h2>
-    <p class="who">Escolha o que a outra pessoa poderá ver e editar.</p>
-    <label class="chk"><input type="checkbox" id="cAll" checked><b>Todas as categorias</b></label>
-    ${cats.map(c=>`<label class="chk"><input type="checkbox" class="cOne" value="${esc(c)}" checked><span>${esc(c)}</span></label>`).join("")}
+    <h2>Compartilhar lista</h2>
+    <p class="who">Por padrão, todas as categorias são compartilhadas.</p>
+    <button class="btn ghost" id="sPick">Selecionar categorias</button>
+    <div id="sList" class="hidden" style="margin-top:12px">
+      <label class="chk"><input type="checkbox" id="cAll" checked><b>Todas as categorias</b></label>
+      ${cats.map(c=>`<label class="chk"><input type="checkbox" class="cOne" value="${esc(c)}" checked><span>${esc(c)}</span></label>`).join("")}
+    </div>
     <div class="err" id="sErr"></div>
-    <button class="btn accent" id="sGo">Gerar código</button>
+    <button class="btn accent" id="sGo">Enviar link</button>
+    <button class="btn ghost" id="sCopy">Copiar link</button>
     <button class="btn ghost" id="sCancel">Cancelar</button>`);
+  let picking = false;
   const ones = () => [...document.querySelectorAll("#modal .cOne")];
+  $("#sPick").onclick = () => {
+    picking = !picking;
+    $("#sList").classList.toggle("hidden", !picking);
+    $("#sPick").textContent = picking ? "Compartilhar todas" : "Selecionar categorias";
+    ones().forEach(b=>b.checked=true); $("#cAll").checked = true;
+    $("#sErr").textContent = "";
+  };
   $("#cAll").onchange = e => ones().forEach(b=>b.checked=e.target.checked);
   ones().forEach(b=>b.onchange = () => { $("#cAll").checked = ones().every(x=>x.checked); });
   $("#sCancel").onclick = closeModal;
-  $("#sGo").onclick = async () => {
-    const sel = ones().filter(b=>b.checked).map(b=>b.value);
-    if(!sel.length){ $("#sErr").textContent="Escolha pelo menos uma categoria."; return; }
-    const all = sel.length===cats.length;
+  const make = async () => {
+    let sel = null;
+    if(picking){
+      const chosen = ones().filter(b=>b.checked).map(b=>b.value);
+      if(!chosen.length){ $("#sErr").textContent="Escolha pelo menos uma categoria."; return null; }
+      sel = chosen.length===cats.length ? null : chosen;
+    }
     const code = genCode();
-    try{
-      await setDoc(doc(db,"invites",code),{listId:l.id,categories:all?null:sel,createdBy:user.uid});
-    }catch(e){ console.error(e); $("#sErr").textContent="Não foi possível gerar o código. Verifique a conexão."; return; }
-    const link = `${location.origin}${location.pathname}?codigo=${code}`;
-    showSheet(`
-      <h2>Código gerado</h2>
-      <p class="who">${all?"Todas as categorias.":"Categorias: "+esc(sel.join(", "))+"."} Quem entrar com este código acessa essas categorias da lista “${esc(l.name)}”.</p>
-      <div class="code">${esc(code)}</div>
-      <button class="btn accent" id="rWa">Enviar pelo WhatsApp</button>
-      <button class="btn ghost" id="rCopy">Copiar link</button>
-      <button class="btn ghost" id="rClose">Fechar</button>`);
-    $("#rWa").onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(`Entra na lista “${l.name}”: ${link}\nCódigo: ${code}`)}`,"_blank");
-    $("#rCopy").onclick = async () => { try{await navigator.clipboard.writeText(link);toast("Link copiado")}catch{toast("Código: "+code)} };
-    $("#rClose").onclick = closeModal;
+    try{ await setDoc(doc(db,"invites",code),{listId:l.id,categories:sel,createdBy:user.uid}); }
+    catch(e){ console.error(e); $("#sErr").textContent="Não foi possível gerar o link. Verifique a conexão."; return null; }
+    return `${location.origin}${location.pathname}?codigo=${code}`;
+  };
+  $("#sGo").onclick = async () => {
+    const link = await make(); if(!link) return;
+    const text = `Entra na nossa lista “${l.name}” no app Marcas boas e ruins: ${link}`;
+    closeModal();
+    if(navigator.share){
+      try{ await navigator.share({title:l.name,text}); return; }
+      catch(e){ if(e.name==="AbortError") return; }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,"_blank");
+  };
+  $("#sCopy").onclick = async () => {
+    const link = await make(); if(!link) return;
+    closeModal();
+    try{ await navigator.clipboard.writeText(link); toast("Link copiado"); }
+    catch{ toast("Não foi possível copiar"); }
   };
 }
 </script>
