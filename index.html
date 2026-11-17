@@ -18,7 +18,7 @@
 :root{
   --bg:#000000; --surface:#241C27; --ink:#F2EDF3; --muted:#A99FB0; --line:#3A2F3E; color-scheme:dark;
   --good:#4FC58A; --good-soft:#17342A; --bad:#F0777E; --bad-soft:#3E1D21;
-  --plum:#120C14; --accent:var(--good); --accent-soft:var(--good-soft); --on:#120C14;
+  --plum:#120C14; --accent:var(--good); --accent-soft:var(--good-soft); --on:#120C14; --grad:linear-gradient(160deg,#1F7A4D 0%,#B3262E 100%);
   --r:16px;
   font-family:'Figtree',system-ui,sans-serif;
 }
@@ -153,27 +153,44 @@ main{padding:8px 16px;max-width:620px;margin:0 auto}
 @keyframes pulse{50%{opacity:.5}}
 .undo{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--surface);border:1px solid var(--line);padding:10px 14px;border-radius:12px;z-index:41;display:flex;gap:14px;align-items:center;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .undo button{color:var(--good);font-weight:800;padding:4px 6px}
-#splash{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;z-index:100;transition:opacity .5s ease}
+#splash{position:fixed;inset:0;background:var(--grad);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;z-index:100;transition:opacity .5s ease;color:#fff;padding:24px;text-align:center}
 #splash.out{opacity:0;pointer-events:none}
-#splash .sp2{width:min(280px,76vw);height:auto;animation:pop 1s ease-out both}
-@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
-@keyframes fadeUp{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion:reduce){#splash *{animation:none!important;opacity:1}}
-#auth{padding-top:40px}
+.sp-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:2.4rem;line-height:1.05;text-transform:uppercase;animation:fadeUp .8s ease-out both}
+#splash .sp2{width:150px;height:150px;border-radius:32px;animation:pop 1s ease-out both .2s}
+.sp-load{width:min(220px,60vw);height:4px;background:rgba(255,255,255,.3);border-radius:4px;overflow:hidden}
+.sp-load span{display:block;height:100%;width:0;background:#fff;border-radius:4px;animation:load 2.2s ease-in-out forwards .2s}
+@keyframes load{to{width:100%}}
+@media (prefers-reduced-motion:reduce){#splash *{animation:none!important;opacity:1}.sp-load span{width:100%}}
+#auth{max-width:none;margin:0;min-height:100vh;background:var(--grad);padding:48px 24px 40px;box-sizing:border-box}
+#auth > *{max-width:420px;margin-left:auto;margin-right:auto}
 .segAuth{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:22px}
 .segAuth button{padding:12px;border-radius:10px;font-weight:700;color:var(--muted)}
 .segAuth button.on{background:var(--good);color:var(--on)}
 .btn.lg{padding:17px;font-size:1.05rem;letter-spacing:.02em;border-radius:14px}
 .or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.85rem;margin:18px 0}
 .or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
+#auth .auth-title{color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:2rem;text-align:center;line-height:1.05;text-transform:uppercase;margin:0 0 22px}
+#auth .auth-ic{display:block;width:110px;height:110px;border-radius:26px;margin:0 auto 26px}
+#auth .field span{color:#fff;font-weight:600}
+#auth .field input{background:#fff;color:#241C27;border:0;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+#auth .field input::placeholder{color:#8a8290}
+#auth .segAuth{background:rgba(255,255,255,.18);border:0}
+#auth .segAuth button{color:#fff}
+#auth .segAuth button.on{background:#fff;color:#1F7A4D}
+#auth .btn.accent{background:#120C14;color:#fff}
+#auth .err{color:#fff;font-weight:700}
+#auth .or{color:#fff}
+#auth .or:before,#auth .or:after{background:rgba(255,255,255,.45)}
+#auth .btn.ghost{color:#fff;border-color:#fff}
 .toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem;max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
-<div id="splash"><img class="sp2" src="logo-h.png" alt="Marcas boas e ruins"></div>
+<div id="splash"><div class="sp-title">Marcas boas<br>e ruins</div><img class="sp2" src="icon-512.png" alt=""><div class="sp-load"><span></span></div></div>
 
 <section id="auth" class="hidden">
-  <img src="logo-h.png" alt="Marcas boas e ruins" style="display:block;width:min(240px,70%);height:auto;margin:8px auto 28px">
+  <h1 class="auth-title">Marcas boas<br>e ruins</h1>
+  <img class="auth-ic" src="icon-512.png" alt="">
   <div class="segAuth"><button id="tabIn" class="on">Entrar</button><button id="tabUp">Criar conta</button></div>
   <label class="field" id="nameField"><span>Seu nome</span><input id="aName" autocomplete="name" placeholder="Como quer aparecer na lista"></label>
   <label class="field"><span>E-mail</span><input id="aEmail" type="email" autocomplete="email" inputmode="email" placeholder="seu@email.com"></label>
