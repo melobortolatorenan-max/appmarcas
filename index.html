@@ -16,14 +16,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#000000; --surface:#241C27; --ink:#F2EDF3; --muted:#A99FB0; --line:#3A2F3E; color-scheme:dark;
-  --good:#4FC58A; --good-soft:#17342A; --bad:#F0777E; --bad-soft:#3E1D21;
-  --plum:#120C14; --accent:var(--good); --accent-soft:var(--good-soft); --on:#120C14; --grad:linear-gradient(160deg,#1F7A4D 0%,#B3262E 100%);
+  --bg:#000000; --surface:#FFFFFF; --ink:#241C27; --muted:#6F6674; --line:#E6E1E8; color-scheme:light;
+  --good:#1F7A4D; --good-soft:#E3F2EA; --bad:#B3262E; --bad-soft:#FBE7E8;
+  --plum:#120C14; --accent:var(--good); --accent-soft:var(--good-soft); --on:#FFFFFF; --grad:linear-gradient(160deg,#1F7A4D 0%,#B3262E 100%);
   --r:16px;
   font-family:'Figtree',system-ui,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-size:16px}
+html{background:#B3262E}
+html,body{margin:0;color:#fff;font-size:16px}
+body{background:var(--grad)}
 body{padding-top:env(safe-area-inset-top);padding-bottom:calc(32px + env(safe-area-inset-bottom));min-height:100vh}
 body.bad{--accent:var(--bad);--accent-soft:var(--bad-soft)}
 h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;margin:0}
@@ -182,14 +184,42 @@ main{padding:8px 16px;max-width:620px;margin:0 auto}
 #auth .or{color:#fff}
 #auth .or:before,#auth .or:after{background:rgba(255,255,255,.45)}
 #auth .btn.ghost{color:#fff;border-color:#fff}
+.wm{font-family:'Figtree',Arial,sans-serif;font-weight:800;text-transform:uppercase;line-height:.95;text-align:center;color:#fff}
+.wm .w1{display:block;font-size:2.7rem;letter-spacing:-.01em}
+.wm .w2{display:block;font-size:2.4rem;letter-spacing:-.01em}
+.wm .g{color:#2E9E68;font-weight:800}.wm .r{color:#E0453A;font-weight:800}
+.wm .sl{color:#2E9E68;font-style:normal;font-weight:800}
+.sp-title{animation:fadeUp .8s ease-out both}
+.homeWm{margin:0 0 14px}
+.homeWm .w1{font-size:2rem}.homeWm .w2{font-size:1.8rem}
+.homeIc{display:block;width:72px;height:72px;border-radius:18px;margin:0 auto 10px}
+.bar{background:transparent;border-bottom:0}
+.iconbtn{background:rgba(255,255,255,.2)}
+.iconbtn.dark{background:rgba(255,255,255,.2);border:0;color:#fff}
+.homeTop small{color:rgba(255,255,255,.85)}
+.empty{color:rgba(255,255,255,.9)}
+.empty b{color:#fff}
+.big{color:#120C14}
+.big.good{background:#4FC58A}
+.big.bad{background:#F07A6E}
+.card,.catcard,.item,.listrow,.chk,.search,.sheet,.code{color:var(--ink)}
+.sheet{background:#FFFFFF}
+.sheet .field span{color:var(--muted)}
+.field input,.field select,.field textarea,.search,.catsel select{color:var(--ink)}
+.seg button{color:var(--ink)}
+.seg .g.on,.seg .b.on{color:#fff}
+.chip{color:var(--ink)}
+.chip.on{color:#fff}
+.err{color:#fff;font-weight:700}
+.sheet .err{color:var(--bad)}
 .toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem;max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
-<div id="splash"><div class="sp-title">Marcas boas<br>e ruins</div><img class="sp2" src="icon-512.png" alt=""><div class="sp-load"><span></span></div></div>
+<div id="splash"><div class="wm sp-title"><span class="w1">MARCAS</span><span class="w2"><b class="g">BOAS</b><i class="sl">/</i><b class="r">RUINS</b></span></div><img class="sp2" src="icon-512.png" alt=""><div class="sp-load"><span></span></div></div>
 
 <section id="auth" class="hidden">
-  <h1 class="auth-title">Marcas boas<br>e ruins</h1>
+  <div class="wm auth-title"><span class="w1">MARCAS</span><span class="w2"><b class="g">BOAS</b><i class="sl">/</i><b class="r">RUINS</b></span></div>
   <img class="auth-ic" src="icon-512.png" alt="">
   <div class="segAuth"><button id="tabIn" class="on">Entrar</button><button id="tabUp">Criar conta</button></div>
   <label class="field" id="nameField"><span>Seu nome</span><input id="aName" autocomplete="name" placeholder="Como quer aparecer na lista"></label>
@@ -687,7 +717,7 @@ function drawHome(){
   const l = curList();
   $("#view").innerHTML = `
     <div class="home">
-      <img class="homeLogo" src="logo-h.png" alt="Marcas boas e ruins">
+      <img class="homeIc" src="icon-512.png" alt=""><div class="wm homeWm"><span class="w1">MARCAS</span><span class="w2"><b class="g">BOAS</b><i class="sl">/</i><b class="r">RUINS</b></span></div>
       <div class="homeTop">
         <div class="who2">${avatar(myPhoto(),myName(),56)}<div style="min-width:0"><small>Olá,</small><h1>${esc(myName())}</h1></div></div>
         <div class="icons">
