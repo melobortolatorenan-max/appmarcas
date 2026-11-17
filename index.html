@@ -153,22 +153,35 @@ main{padding:8px 16px;max-width:620px;margin:0 auto}
 @keyframes pulse{50%{opacity:.5}}
 .undo{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--surface);border:1px solid var(--line);padding:10px 14px;border-radius:12px;z-index:41;display:flex;gap:14px;align-items:center;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .undo button{color:var(--good);font-weight:800;padding:4px 6px}
+#splash{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;z-index:100;transition:opacity .5s ease}
+#splash.out{opacity:0;pointer-events:none}
+#splash .sp2{width:min(280px,76vw);height:auto;animation:pop 1s ease-out both}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadeUp{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){#splash *{animation:none!important;opacity:1}}
+#auth{padding-top:40px}
+.segAuth{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:22px}
+.segAuth button{padding:12px;border-radius:10px;font-weight:700;color:var(--muted)}
+.segAuth button.on{background:var(--good);color:var(--on)}
+.btn.lg{padding:17px;font-size:1.05rem;letter-spacing:.02em;border-radius:14px}
+.or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.85rem;margin:18px 0}
+.or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
 .toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem;max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
+<div id="splash"><img class="sp2" src="logo-h.png" alt="Marcas boas e ruins"></div>
 
 <section id="auth" class="hidden">
-  <img class="logo" src="logo-h.png" alt="Marcas boas e ruins">
-  <h1 class="sr">Marcas boas e ruins</h1>
-  <p>As listas do casal, num lugar só. Entre para ver e editar junto.</p>
+  <img src="logo-h.png" alt="Marcas boas e ruins" style="display:block;width:min(240px,70%);height:auto;margin:8px auto 28px">
+  <div class="segAuth"><button id="tabIn" class="on">Entrar</button><button id="tabUp">Criar conta</button></div>
   <label class="field" id="nameField"><span>Seu nome</span><input id="aName" autocomplete="name" placeholder="Como quer aparecer na lista"></label>
-  <label class="field"><span>E-mail</span><input id="aEmail" type="email" autocomplete="email" inputmode="email"></label>
+  <label class="field"><span>E-mail</span><input id="aEmail" type="email" autocomplete="email" inputmode="email" placeholder="seu@email.com"></label>
   <label class="field"><span>Senha</span><input id="aPass" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres"></label>
   <div class="err" id="aErr"></div>
-  <button class="btn" id="aGo">Entrar</button>
+  <button class="btn accent lg" id="aGo">Entrar →</button>
+  <div class="or"><span>ou</span></div>
   <button class="btn ghost" id="aGoogle">Entrar com Google</button>
-  <button class="link" id="aSwitch">Ainda não tenho conta</button>
 </section>
 
 <div id="app" class="hidden"><div id="view"></div></div>
@@ -200,8 +213,15 @@ const db = getFirestore(app);
 const DEFAULT_CATS = ["Vinho","Cerveja","Refrigerante","Suco","Congelado","Sushi","Lanches","Comida","Diversos","Cápsulas de café"];
 const DEFAULT_PLACES = ["Supermercado","Mercado","Atacadão","Adega","Padaria","Loja online","Feira"];
 const INVITE_DAYS = 2;
-const VAPID_KEY = "COLE_A_CHAVE_VAPID_AQUI";
+const VAPID_KEY = "BF5zJAVDrIi7PvDu_-ghfZnAz5BQ7z9kcbFyfsx-69SEPlOzEq-cbzdrWAH4EwctREjbA_iI1ozyEorZGNCm9cc";
 const $ = s => document.querySelector(s);
+{
+  const sp = $("#splash");
+  let seen = false;
+  try{ seen = !!sessionStorage.getItem("marcas:splash"); sessionStorage.setItem("marcas:splash","1"); }catch{}
+  if(seen || !sp) sp?.remove();
+  else setTimeout(()=>{ sp.classList.add("out"); setTimeout(()=>sp.remove(),600); }, 2300);
+}
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const ts = i => i.createdAt?.toMillis?.() ?? Date.now();
@@ -375,11 +395,13 @@ function openCropper(file){
 /* ---------- AUTH ---------- */
 function drawAuth(){
   $("#nameField").classList.toggle("hidden",!signup);
-  $("#aGo").textContent = signup ? "Criar conta" : "Entrar";
-  $("#aSwitch").textContent = signup ? "Já tenho conta" : "Ainda não tenho conta";
+  $("#aGo").textContent = signup ? "Criar conta →" : "Entrar →";
+  $("#tabIn").classList.toggle("on",!signup);
+  $("#tabUp").classList.toggle("on",signup);
   $("#aPass").autocomplete = signup ? "new-password" : "current-password";
 }
-$("#aSwitch").onclick = () => { signup=!signup; $("#aErr").textContent=""; drawAuth(); };
+$("#tabIn").onclick = () => { signup=false; $("#aErr").textContent=""; drawAuth(); };
+$("#tabUp").onclick = () => { signup=true; $("#aErr").textContent=""; drawAuth(); };
 function authErr(e){
   const m = {
     "auth/invalid-credential":"E-mail ou senha incorretos.",
