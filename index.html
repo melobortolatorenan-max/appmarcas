@@ -194,6 +194,11 @@ main{padding:8px 16px;max-width:620px;margin:0 auto}
 .homeWm .w1{font-size:2rem}.homeWm .w2{font-size:1.8rem}
 .homeIc{display:block;width:72px;height:72px;border-radius:18px;margin:0 auto 10px}
 .bar{background:transparent;border-bottom:0;position:relative;top:auto}
+.btn.danger{color:#fff;border-color:#fff}
+.item{display:flex;align-items:center;gap:6px;cursor:pointer}
+.itxt{flex:1;min-width:0}
+.iacts{display:flex;gap:2px;flex:none}
+.iacts .ic{width:38px;height:38px}
 .btnrow .newbtn,.btnrow .newbtn.gray{margin:0}
 .btnrow .newbtn svg{width:22px;height:22px}
 .btnrow .newbtn{font-size:.9rem;padding:16px 8px}
@@ -822,18 +827,39 @@ async function addCategory(type){
   }catch(e){ console.error(e); toast("Não foi possível criar a categoria"); return null; }
 }
 function bindItems(el){
-  el.querySelectorAll(".item").forEach(b=>b.onclick=()=>openForm(items.find(i=>i.id===b.dataset.id)));
+  el.querySelectorAll(".item").forEach(card=>{
+    const it = items.find(i=>i.id===card.dataset.id);
+    if(!it) return;
+    card.onclick = () => openForm(it);
+    card.querySelector('[data-act="edit"]').onclick = e => { e.stopPropagation(); openForm(it); };
+    card.querySelector('[data-act="del"]').onclick = e => { e.stopPropagation(); deleteProduct(it); };
+  });
+}
+async function deleteProduct(it){
+  if(!confirm(`Excluir “${it.name}”?`)) return;
+  try{
+    const saved = {...it}; delete saved.id;
+    myDeleted.add(it.id); await deleteDoc(doc(db,"lists",listId,"items",it.id));
+    pushToOthers(`“${it.name}” foi removido de ${typeName(it.type)} › ${catOf(it)}`, catOf(it));
+    undoBar(`“${it.name}” excluído`, () => setDoc(doc(db,"lists",listId,"items",it.id), saved));
+  }catch(e){ console.error(e); toast("Não foi possível excluir"); }
 }
 const itemHtml = (i,showCat,showTag) => `
-  <button class="item ${showTag?i.type:""}" data-id="${i.id}">
-    ${showTag?`<span class="tag ${i.type}">${i.type==="good"?"Marca boa":"Marca ruim"}</span>`:""}
-    <b>${esc(i.name)}</b>
-    ${showCat?`<div class="note">${esc(catOf(i))}</div>`:""}
-    ${i.note?`<div class="note">${esc(i.note)}</div>`:""}
-    ${i.place?`<div class="note">Local: ${esc(i.place)}</div>`:""}
-    ${i.price!=null?`<div class="price">Pago: ${brl(i.price)}</div>`:""}
-    <div class="by">${esc(i.addedByName||"")}</div>
-  </button>`;
+  <div class="item ${showTag?i.type:""}" data-id="${i.id}">
+    <div class="itxt">
+      ${showTag?`<span class="tag ${i.type}">${i.type==="good"?"Marca boa":"Marca ruim"}</span>`:""}
+      <b>${esc(i.name)}</b>
+      ${showCat?`<div class="note">${esc(catOf(i))}</div>`:""}
+      ${i.note?`<div class="note">${esc(i.note)}</div>`:""}
+      ${i.place?`<div class="note">Local: ${esc(i.place)}</div>`:""}
+      ${i.price!=null?`<div class="price">Pago: ${brl(i.price)}</div>`:""}
+      <div class="by">${esc(i.addedByName||"")}</div>
+    </div>
+    <div class="iacts">
+      <button class="ic edit" data-act="edit" aria-label="Editar produto">${ICON_EDIT}</button>
+      <button class="ic del" data-act="del" aria-label="Excluir produto">${ICON_TRASH}</button>
+    </div>
+  </div>`;
 
 function renderCats(){
   const el = $("#content"); if(!el) return;
