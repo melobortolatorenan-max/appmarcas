@@ -151,6 +151,8 @@ main{padding:8px 16px;max-width:620px;margin:0 auto}
 .mic svg{width:22px;height:22px}
 .mic.on{background:var(--bad);color:#fff;animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.5}}
+.undo{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--surface);border:1px solid var(--line);padding:10px 14px;border-radius:12px;z-index:41;display:flex;gap:14px;align-items:center;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.undo button{color:var(--good);font-weight:800;padding:4px 6px}
 .toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:.92rem;max-width:90vw;text-align:center}
 </style>
 </head>
@@ -178,7 +180,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   GoogleAuthProvider, signInWithPopup, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot,
-  query, where, serverTimestamp, arrayUnion, arrayRemove, writeBatch, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  query, where, serverTimestamp, arrayUnion, arrayRemove, writeBatch, deleteField, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getMessaging, getToken, isSupported } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB4CUawMDCq8hMBdSjQSuGxzqciZz8Lb2k",
@@ -196,10 +199,13 @@ const db = getFirestore(app);
 
 const DEFAULT_CATS = ["Vinho","Cerveja","Refrigerante","Suco","Congelado","Sushi","Lanches","Comida","Diversos","Cápsulas de café"];
 const DEFAULT_PLACES = ["Supermercado","Mercado","Atacadão","Adega","Padaria","Loja online","Feira"];
+const INVITE_DAYS = 2;
+const VAPID_KEY = "COLE_A_CHAVE_VAPID_AQUI";
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
-const byName = (a,b) => a.name.localeCompare(b.name);
+const ts = i => i.createdAt?.toMillis?.() ?? Date.now();
+const byName = (a,b) => sortMode==="recent" ? ts(b)-ts(a) : a.name.localeCompare(b.name);
 const catOf = i => i.category || "Sem categoria";
 const brl = n => Number(n).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const typeName = t => t==="good" ? "Marcas boas" : "Marcas ruins";
@@ -219,6 +225,7 @@ let user = null, lists = [], listId = null, items = [];
 let view = "home", curType = "good", curCat = null, q = "", depth = 0;
 let unsubLists = null, unsubItems = null, watchedId = null;
 let signup = false, formCtx = null, profDraft = null;
+let sortMode = ls.get("marcas:sort") || "az";
 const myDeleted = new Set();
 const synced = new Set();
 
@@ -418,6 +425,7 @@ onAuthStateChanged(auth, u => {
   history.replaceState({view:"home",curType,curCat:null,d:0},"");
   shell();
   startLists();
+  if("Notification" in window && Notification.permission==="granted") enablePush();
   const c = new URLSearchParams(location.search).get("codigo");
   if(c){ history.replaceState({view:"home",curType,curCat:null,d:0},"",location.pathname); joinByCode(c); }
 });
@@ -528,15 +536,63 @@ async function removeMember(l,uid,name){
   }catch(e){ console.error(e); toast("Não foi possível remover"); }
 }
 
+/* ---------- AÇÕES: renomear/excluir lista, desfazer, avisos ---------- */
+let undoT = null;
+function undoBar(msg, undo){
+  document.querySelector("#undo")?.remove();
+  const el = document.createElement("div"); el.id = "undo"; el.className = "undo";
+  el.innerHTML = `<span>${esc(msg)}</span><button>Desfazer</button>`;
+  document.body.appendChild(el);
+  el.querySelector("button").onclick = async () => {
+    el.remove(); clearTimeout(undoT);
+    try{ await undo(); toast("Desfeito"); }catch(e){ console.error(e); toast("Não foi possível desfazer"); }
+  };
+  clearTimeout(undoT); undoT = setTimeout(()=>el.remove(), 6000);
+}
+async function renameList(){
+  const l = curList(); const n = (prompt("Novo nome da lista:", l.name)||"").trim();
+  if(!n || n===l.name) return;
+  try{ await updateDoc(doc(db,"lists",l.id),{name:n}); toast("Lista renomeada"); }
+  catch(e){ console.error(e); toast("Não foi possível renomear"); }
+}
+async function deleteList(){
+  const l = curList();
+  if(!confirm(`Excluir a lista “${l.name}” e todos os produtos dela? Isso não pode ser desfeito.`)) return;
+  try{
+    const snap = await getDocs(collection(db,"lists",l.id,"items"));
+    snap.docs.forEach(d=>myDeleted.add(d.id));
+    for(let k=0;k<snap.docs.length;k+=400){
+      const b = writeBatch(db);
+      snap.docs.slice(k,k+400).forEach(d=>b.delete(d.ref));
+      await b.commit();
+    }
+    await deleteDoc(doc(db,"lists",l.id));
+    unsubItems?.(); watchedId=null; items=[]; listId=null; ls.set("marcas:list","");
+    toast("Lista excluída"); toHome();
+  }catch(e){ console.error(e); toast("Não foi possível excluir a lista"); }
+}
+async function pushToOthers(body, cat){
+  try{
+    const idToken = await user.getIdToken();
+    fetch("/api/notify",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+idToken},
+      body:JSON.stringify({listId, title:"Marcas boas e ruins", body, cat})}).catch(()=>{});
+  }catch(e){ console.error(e); }
+}
+async function enablePush(){
+  try{
+    if(!user || !VAPID_KEY || VAPID_KEY.startsWith("COLE")) return false;
+    if(!(await isSupported())) return false;
+    const reg = await navigator.serviceWorker.ready;
+    const token = await getToken(getMessaging(app), {vapidKey:VAPID_KEY, serviceWorkerRegistration:reg});
+    if(!token) return false;
+    await setDoc(doc(db,"tokens",user.uid), {tokens: arrayUnion(token)}, {merge:true});
+    return true;
+  }catch(e){ console.error(e); return false; }
+}
+
 /* ---------- NOTIFICAÇÕES ---------- */
 function notifSupported(){ return "Notification" in window; }
-function sendNotif(title,body,tag){
-  if(!document.hidden){ toast(body); return; }
-  if(!notifSupported() || Notification.permission!=="granted") return;
-  const opts = {body,icon:"icon-192.png",badge:"icon-192.png",tag};
-  if(navigator.serviceWorker?.ready) navigator.serviceWorker.ready.then(r=>r.showNotification(title,opts)).catch(()=>{ try{ new Notification(title,opts) }catch{} });
-  else { try{ new Notification(title,opts) }catch{} }
-}
+function sendNotif(title,body){ toast(body); }
 function notifyChanges(changes){
   const a = allowedCats(), msgs = [];
   changes.forEach(ch=>{
@@ -748,9 +804,15 @@ function drawItems(){
       <button class="iconbtn" id="back" aria-label="Voltar">${ICON_BACK}</button>
       <h2>${esc(curCat||"")}</h2>
     </header>
-    <main><button class="newbtn" id="newP">${ICON_ADD}&nbsp;NOVO PRODUTO</button><div id="content"></div></main>`;
+    <main><button class="newbtn" id="newP">${ICON_ADD}&nbsp;NOVO PRODUTO</button>
+      <div class="chips" id="sortChips">
+        <button class="chip ${sortMode==="az"?"on":""}" data-s="az">A–Z</button>
+        <button class="chip ${sortMode==="recent"?"on":""}" data-s="recent">Recentes</button>
+      </div>
+      <div id="content"></div></main>`;
   $("#back").onclick = () => goBack("cats");
   $("#newP").onclick = () => openForm(null,curCat);
+  $("#sortChips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ sortMode=b.dataset.s; ls.set("marcas:sort",sortMode); drawItems(); });
   renderItems();
 }
 function renderItems(){
@@ -760,31 +822,39 @@ function renderItems(){
   bindItems(el);
 }
 
-async function renameCat(c){
+async function renameCat(c, type=curType){
   const n = (prompt("Novo nome da categoria:",c)||"").trim();
-  if(!n || n===c) return;
+  if(!n || n===c) return null;
   const l = curList();
   try{
     const b = writeBatch(db);
-    items.filter(i=>i.type===curType && catOf(i)===c).forEach(i=>b.update(doc(db,"lists",listId,"items",i.id),{category:n}));
-    const upd = {cats:[...new Set([...(l.cats||[]).filter(x=>x!==`${curType}:${c}`),`${curType}:${n}`])]};
+    items.filter(i=>i.type===type && catOf(i)===c).forEach(i=>b.update(doc(db,"lists",listId,"items",i.id),{category:n}));
+    const upd = {cats:[...new Set([...(l.cats||[]).filter(x=>x!==`${type}:${c}`),`${type}:${n}`])]};
     if(l.ownerId===user.uid && l.access){
       const acc = {}; Object.entries(l.access).forEach(([u,v])=>{ acc[u] = Array.isArray(v) ? v.map(x=>x===c?n:x) : v; });
       upd.access = acc;
     }
     b.update(doc(db,"lists",listId),upd);
-    await b.commit(); toast("Categoria renomeada");
-  }catch(e){ console.error(e); toast("Não foi possível renomear"); }
+    await b.commit(); toast("Categoria renomeada"); return n;
+  }catch(e){ console.error(e); toast("Não foi possível renomear"); return null; }
 }
-async function deleteCat(c){
-  const mine = items.filter(i=>i.type===curType && catOf(i)===c);
+async function deleteCat(c, type=curType){
+  const mine = items.filter(i=>i.type===type && catOf(i)===c);
   if(!confirm(`Excluir a categoria “${c}” e os ${mine.length} produto(s) dela?`)) return;
   const l = curList();
+  const saved = mine.map(i=>{ const d = {...i}; delete d.id; return [i.id, d]; });
   try{
     const b = writeBatch(db);
     mine.forEach(i=>{ myDeleted.add(i.id); b.delete(doc(db,"lists",listId,"items",i.id)); });
-    b.update(doc(db,"lists",listId),{cats:(l.cats||[]).filter(x=>x!==`${curType}:${c}`)});
-    await b.commit(); toast("Categoria excluída");
+    b.update(doc(db,"lists",listId),{cats:(l.cats||[]).filter(x=>x!==`${type}:${c}`)});
+    await b.commit();
+    pushToOthers(`Categoria “${c}” removida (${mine.length} produto(s))`, c);
+    undoBar(`Categoria “${c}” excluída`, async () => {
+      const b2 = writeBatch(db);
+      saved.forEach(([id,d])=>b2.set(doc(db,"lists",listId,"items",id),d));
+      b2.update(doc(db,"lists",listId),{cats:arrayUnion(`${type}:${c}`)});
+      await b2.commit();
+    });
   }catch(e){ console.error(e); toast("Não foi possível excluir"); }
 }
 
@@ -814,7 +884,7 @@ function drawForm(){
       <label class="field"><span>Produto ou marca</span><input id="fName" value="${esc(it?.name||"")}" placeholder="Ex.: Vinho Balduzzi" autocomplete="off"></label>
       <div class="field"><span>Categoria</span>
         <div class="catsel"><select id="fCat"></select>
-        <button class="iconbtn dark" id="fNewCat" type="button" aria-label="Adicionar categoria">${ICON_ADD}</button></div>
+        <button class="iconbtn dark" id="fEditCat" type="button" aria-label="Renomear categoria">${ICON_EDIT}</button><button class="iconbtn dark" id="fNewCat" type="button" aria-label="Adicionar categoria">${ICON_ADD}</button></div>
       </div>
       <label class="field"><span>Local de compra (opcional)</span><input id="fPlace" value="${esc(it?.place||"")}" placeholder="Ex.: Atacadão, Adega Central" autocomplete="off"></label>
       <div class="chips" id="chips">${places.map(p=>`<button type="button" class="chip" data-p="${esc(p)}">${esc(p)}</button>`).join("")}</div>
@@ -844,6 +914,11 @@ function drawForm(){
   $("#tB").onclick = () => { type="bad"; paint(); };
   $("#back").onclick = () => goBack("home");
   $("#chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ $("#fPlace").value = b.dataset.p; });
+  $("#fEditCat").onclick = async () => {
+    if(!selected){ toast("Escolha uma categoria para renomear"); return; }
+    const n = await renameCat(selected, type);
+    if(n){ formCtx.extra.add(n); selected = n; fillCats(); }
+  };
   $("#fNewCat").onclick = async () => {
     const n = await addCategory(type);
     if(n){ formCtx.extra.add(n); selected = n; fillCats(); }
@@ -859,6 +934,7 @@ function drawForm(){
       await ensureAccess(selected);
       if(isNew){
         await addDoc(collection(db,"lists",listId,"items"),{...data,addedBy:user.uid,addedByName:user.displayName||user.email,createdAt:serverTimestamp()});
+        pushToOthers(`${user.displayName||user.email} adicionou “${data.name}” em ${typeName(type)} › ${data.category||"Sem categoria"}`, data.category||"Sem categoria");
       } else {
         await updateDoc(doc(db,"lists",listId,"items",it.id),{...data,editedByName:user.displayName||user.email});
       }
@@ -867,7 +943,13 @@ function drawForm(){
   };
   if(!isNew) $("#fDel").onclick = async () => {
     if(!confirm(`Excluir “${it.name}”?`)) return;
-    try{ myDeleted.add(it.id); await deleteDoc(doc(db,"lists",listId,"items",it.id)); formCtx=null; goBack("home"); }
+    try{
+      const saved = {...it}; delete saved.id;
+      myDeleted.add(it.id); await deleteDoc(doc(db,"lists",listId,"items",it.id));
+      pushToOthers(`“${it.name}” foi removido de ${typeName(it.type)} › ${catOf(it)}`, catOf(it));
+      formCtx=null; goBack("home");
+      undoBar(`“${it.name}” excluído`, () => setDoc(doc(db,"lists",listId,"items",it.id), saved));
+    }
     catch(e){ console.error(e); toast("Não foi possível excluir"); }
   };
 }
@@ -919,7 +1001,8 @@ function renderExtras(){
     ${isStandalone()?"":`<div class="card row"><div><div class="v">Instalar o app</div><div class="k">${inst}</div></div><button class="iconbtn dark" id="iBtn" aria-label="Instalar">${ICON_DL}</button></div>`}`;
   $("#nBtn")?.addEventListener("click", async () => {
     const r = await Notification.requestPermission();
-    toast(r==="granted" ? "Notificações ativadas" : "Notificações não permitidas");
+    if(r==="granted"){ const ok = await enablePush(); toast(ok ? "Notificações ativadas" : "Não foi possível ativar as notificações"); }
+    else toast("Notificações não permitidas");
     renderExtras();
   });
   $("#iBtn")?.addEventListener("click", async () => {
@@ -994,7 +1077,7 @@ function openShare(){
   if(!cats.length){ toast("Cadastre categorias antes de compartilhar"); return; }
   showSheet(`
     <h2>Compartilhar lista</h2>
-    <p class="who">Por padrão, todas as categorias são compartilhadas.</p>
+    <p class="who">Por padrão, todas as categorias são compartilhadas. O link vale por ${INVITE_DAYS} dias.</p>
     <button class="btn ghost" id="sPick">Selecionar categorias</button>
     <div id="sList" class="hidden" style="margin-top:12px">
       <label class="chk"><input type="checkbox" id="cAll" checked><b>Todas as categorias</b></label>
@@ -1024,7 +1107,7 @@ function openShare(){
       sel = chosen.length===cats.length ? null : chosen;
     }
     const code = genCode();
-    try{ await setDoc(doc(db,"invites",code),{listId:l.id,categories:sel,createdBy:user.uid}); }
+    try{ await setDoc(doc(db,"invites",code),{listId:l.id,categories:sel,createdBy:user.uid,expiresAt:Date.now()+INVITE_DAYS*864e5}); }
     catch(e){ console.error(e); $("#sErr").textContent="Não foi possível gerar o link. Verifique a conexão."; return null; }
     return `${location.origin}${location.pathname}?codigo=${code}`;
   };
